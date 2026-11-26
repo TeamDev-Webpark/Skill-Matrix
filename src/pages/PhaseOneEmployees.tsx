@@ -1,3 +1,4 @@
+import { Paged } from '../components/Paged';
 import { FilterBar } from '../components/FilterBar';
 import { useState, useRef } from 'react';
 import { Users, Plus, X, Upload, Trash2, ArrowRightLeft, History, Calendar, Check, Building2, ShieldCheck, Pencil, FileSpreadsheet } from 'lucide-react';
@@ -637,7 +638,7 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
                             {previousSkills.length === 0 ? (
                               <p className="text-xs text-slate-400 italic">ไม่มีข้อมูลสกิลที่บันทึกไว้ในแผนกเดิม</p>
                             ) : (
-                              <div className="overflow-x-auto rounded-lg border border-slate-200">
+                              <Paged items={previousSkills} unit="สกิล">{({ rows, bar }) => <div className="overflow-hidden rounded-lg border border-slate-200"><div className="overflow-x-auto">
                                 <table className="w-full text-left text-xs">
                                   <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
                                     <tr>
@@ -649,7 +650,7 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-slate-100">
-                                    {previousSkills.map(([key, score]) => {
+                                    {rows.map(([key, score]) => {
                                       const wiCode = key.slice(0, key.lastIndexOf('_'));
                                       const typeCode = key.slice(key.lastIndexOf('_') + 1);
                                       const wi = SKILL_WIS.find(w => w.code === wiCode);
@@ -678,7 +679,7 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
                                     })}
                                   </tbody>
                                 </table>
-                              </div>
+                              </div>{bar}</div>}</Paged>
                             )}
                           </div>
                         </div>

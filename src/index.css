@@ -1,12 +1,19 @@
+/* ฟอนต์หลักของระบบ: IBM Plex Sans Thai (เก็บในโปรเจกต์ ใช้ได้แม้ไม่ต่ออินเทอร์เน็ต · หนาสุด 700) */
+@import "@fontsource/ibm-plex-sans-thai/300.css";
+@import "@fontsource/ibm-plex-sans-thai/400.css";
+@import "@fontsource/ibm-plex-sans-thai/500.css";
+@import "@fontsource/ibm-plex-sans-thai/600.css";
+@import "@fontsource/ibm-plex-sans-thai/700.css";
 @import "tailwindcss";
 
 @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
-.assessment-report { font-family: 'Sarabun', sans-serif; }
+.assessment-report { font-family: 'IBM Plex Sans Thai', sans-serif; }
 .assessment-report table { font-variant-numeric: tabular-nums; }
 
 @theme {
-  --font-sans: 'Inter', 'Sarabun', sans-serif;
+  --font-sans: 'IBM Plex Sans Thai', sans-serif;
+  --font-mono: 'IBM Plex Sans Thai', ui-monospace, monospace;
   --color-blue-50: #eff6ff;
   --color-blue-100: #dbeafe;
   --color-blue-200: #bfdbfe;

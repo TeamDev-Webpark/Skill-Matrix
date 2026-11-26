@@ -16,6 +16,12 @@ import SectionAssessmentPage from './manager/SectionAssessmentPage';
 import ManagerTrainingApprovalsPage from './manager/TrainingApprovalsPage';
 import { AdminHomePage, AdminEmployeesPage, AdminMasterDataPage, AdminSkillAuditPage, AdminReportsPage, AdminSettingsPage, AdminPermissionsPage, AdminTrainingAuditPage } from './admin/AdminPages';
 import CompareView from './CompareView';
+import TalentFinder from './TalentFinder';
+import { StaffLmsLearningPage, StaffLmsCatalogPage, StaffLmsCertificatesPage } from './staff/LmsStaffPages';
+import { ChiefLmsCertifyPage, ChiefLmsProgressPage } from './chief/LmsChiefPages';
+import ManagerLmsDashboard from './manager/LmsDashboard';
+import ChiefLmsPracticalPage from './chief/LmsPracticalPage';
+import { AdminLmsCoursesPage, AdminLmsEnrollmentsPage, AdminLmsReportsPage } from './admin/LmsAdminPages';
 
 export default function RolePageRouter({page,role,onNavigate,assessmentScope}:{page:string;role:string;onNavigate:(page:string,scope?:ScoreAssessmentScope)=>void;assessmentScope?:ScoreAssessmentScope}) {
   if(!roleCanVisit(page,role)) return <EmptyState>หน้านี้ไม่อยู่ในพื้นที่ของบทบาทที่เลือก</EmptyState>;
@@ -25,6 +31,11 @@ export default function RolePageRouter({page,role,onNavigate,assessmentScope}:{p
     'staff-training-request':<StaffTrainingRequestPage onNavigate={onNavigate}/>,
     'staff-training-tracking':<StaffTrainingTrackingPage onNavigate={onNavigate}/>,
     'staff-training-results':<StaffTrainingResultsPage/>,
+    'staff-lms-learning':<StaffLmsLearningPage/>, 'staff-lms-catalog':<StaffLmsCatalogPage/>, 'staff-lms-certificates':<StaffLmsCertificatesPage/>,
+    'chief-talent-finder':<TalentFinder userRole="chief"/>, 'manager-talent-finder':<TalentFinder userRole="manager"/>,
+    'chief-lms-certify':<ChiefLmsCertifyPage/>, 'chief-lms-progress':<ChiefLmsProgressPage/>, 'chief-lms-practical':<ChiefLmsPracticalPage/>,
+    'manager-lms-dashboard':<ManagerLmsDashboard onNavigate={onNavigate}/>,
+    'admin-lms-courses':<AdminLmsCoursesPage/>, 'admin-lms-enrollments':<AdminLmsEnrollmentsPage/>, 'admin-lms-reports':<AdminLmsReportsPage/>,
     'chief-home':<ChiefHomePage onNavigate={onNavigate}/>, 'chief-training-requests':<ChiefTrainingRequestsPage/>,
     'chief-training-evaluation':<ChiefTrainingEvaluationPage/>, 'chief-team-skills':<ChiefTeamSkillsPage/>,
     'chief-individual-scores':<ChiefIndividualScoresPage/>, 'chief-compare':<CompareView userRole="chief" title="เปรียบเทียบทักษะ"/>, 'chief-yearly':<ChiefYearlyPage/>,

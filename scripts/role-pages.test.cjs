@@ -153,3 +153,10 @@ test('Skill Matrix department view supports site candidate cards view and active
   assert.ok(department.includes('รูปแบบการแสดงผล'));
   assert.ok(department.includes('ทุกระดับ'));
 });
+test('talent finder is available only to chief and manager',()=>{
+  for(const role of ['staff','admin'])for(const id of ['chief-talent-finder','manager-talent-finder'])assert.equal(nav.roleCanVisit(id,role),false);
+  assert.equal(nav.roleCanVisit('chief-talent-finder','chief'),true);assert.equal(nav.roleCanVisit('manager-talent-finder','manager'),true);
+  assert.equal(nav.roleCanVisit('manager-talent-finder','chief'),false);
+  const html=renderToStaticMarkup(React.createElement(Router,{page:'chief-talent-finder',role:'staff',onNavigate(){}}));
+  assert.ok(!html.includes('ค้นหาพนักงานในแผนก')&&html.includes('ไม่อยู่ในพื้นที่'));
+});

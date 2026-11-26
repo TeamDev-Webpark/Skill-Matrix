@@ -8,10 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node --test scripts/phase1-core.test.cjs scripts/role-pages.test.cjs scripts/manager-analytics.test.cjs scripts/demo-data.test.cjs scripts/assessment-pdf.test.cjs",
+    "test": "node --test scripts/phase1-core.test.cjs scripts/role-pages.test.cjs scripts/manager-analytics.test.cjs scripts/demo-data.test.cjs scripts/assessment-pdf.test.cjs scripts/lms-core.test.cjs",
     "test:ui": "npm run build && node scripts/role-pages-ui.test.mjs"
   },
   "dependencies": {
+    "@fontsource/ibm-plex-sans-thai": "^5.3.0",
     "@heroicons/react": "^2.2.0",
     "@remixicon/react": "^4.9.0",
     "@tremor/react": "^3.18.7",

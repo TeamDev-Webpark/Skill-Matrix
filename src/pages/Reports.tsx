@@ -532,11 +532,11 @@ export function Reports({ userRole = 'admin' }: { userRole?: string }) {
         <div className="border-2 border-slate-900 p-4 rounded-none space-y-3">
           <div className="flex items-center justify-between border-b-2 border-slate-900 pb-3">
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900">THAI DAIHEN ELECTRIC CO., LTD.</h1>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">SKILL MATRIX</h1>
               <p className="text-xs font-semibold text-slate-700">WORKFORCE COMPETENCY & SKILL MATRIX MANAGEMENT SYSTEM</p>
             </div>
             <div className="text-right text-xs space-y-0.5 font-mono">
-              <div className="font-bold">Doc No: TDE-SKM-RPT-2026</div>
+              <div className="font-bold">Doc No: SKM-RPT-2026</div>
               <div>Issue Date: {new Date().toISOString().slice(0, 10)}</div>
               <div>ISO Standards: ISO 9001 / ISO 17025</div>
             </div>

@@ -83,7 +83,7 @@ export function Pagination({
   const pages = getPageNumbers();
 
   const btnBase =
-    'inline-flex items-center justify-center rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent';
+    'inline-flex items-center justify-center whitespace-nowrap rounded-lg border text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent';
   const navBtn = `${btnBase} h-8 px-2 border-slate-200 text-slate-700 bg-white hover:bg-slate-50`;
   const pageBtn = (isActive: boolean) =>
     `${btnBase} h-8 min-w-8 px-2.5 ${
@@ -95,7 +95,7 @@ export function Pagination({
   return (
     <div
       ref={containerRef}
-      className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 py-3 border-t border-slate-200 bg-white rounded-b-xl ${className}`}
+      className={`print:hidden flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 bg-white rounded-b-xl ${className}`}
     >
       {/* Left: Summary text & Page Size */}
       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
@@ -105,7 +105,7 @@ export function Pagination({
         </span>
         {onPageSizeChange && (
           <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3">
-            <span>แสดงทีละ:</span>
+            <span className="whitespace-nowrap">แสดงทีละ:</span>
             <select
               aria-label="จำนวนรายการต่อหน้า"
               value={effectivePageSize}
@@ -122,7 +122,7 @@ export function Pagination({
                 </option>
               ))}
             </select>
-            <span>{itemLabel}/หน้า</span>
+            <span className="whitespace-nowrap">{itemLabel}/หน้า</span>
           </div>
         )}
       </div>
@@ -140,7 +140,7 @@ export function Pagination({
             className={navBtn}
           >
             <ChevronsLeft size={16} />
-            <span className="hidden md:inline ml-1">หน้าแรก</span>
+            <span className="hidden 2xl:inline ml-1">หน้าแรก</span>
           </button>
 
           {/* Previous Page */}
@@ -153,7 +153,7 @@ export function Pagination({
             className={navBtn}
           >
             <ChevronLeft size={16} />
-            <span className="hidden md:inline ml-1">ก่อนหน้า</span>
+            <span className="hidden 2xl:inline ml-1">ก่อนหน้า</span>
           </button>
 
           {/* Page Numbers */}
@@ -187,7 +187,7 @@ export function Pagination({
             onClick={() => handlePageChange(Math.min(totalPages, safeCurrentPage + 1))}
             className={navBtn}
           >
-            <span className="hidden md:inline mr-1">ถัดไป</span>
+            <span className="hidden 2xl:inline mr-1">ถัดไป</span>
             <ChevronRight size={16} />
           </button>
 
@@ -200,7 +200,7 @@ export function Pagination({
             onClick={() => handlePageChange(totalPages)}
             className={navBtn}
           >
-            <span className="hidden md:inline mr-1">หน้าหลังสุด</span>
+            <span className="hidden 2xl:inline mr-1">หน้าหลังสุด</span>
             <ChevronsRight size={16} />
           </button>
         </div>

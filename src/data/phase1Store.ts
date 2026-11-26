@@ -41,6 +41,8 @@ window.addEventListener('storage', event => { if (event.key === KEY || event.key
 export function useSkillState() {
   return useSyncExternalStore(listener => { listeners.add(listener); return () => { listeners.delete(listener); }; }, () => state, () => state);
 }
+/** อ่านสถานะล่าสุดนอก React (ใช้ตรวจสิทธิ์ในระบบ LMS) */
+export function getSkillState() { return state; }
 export function getStorageError() { return storageError; }
 export function submitSkillAdjustment(role: Role, employeeId: string, proposed: Record<string, number>, reason: string, evidence: string) {
   if (storageError) throw new Error(storageError);

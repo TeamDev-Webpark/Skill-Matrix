@@ -1,3 +1,4 @@
+import { Paged } from '../components/Paged';
 import { useState } from 'react';
 import { GitCompare, Users, Building2, TrendingUp, Calendar, ArrowRight } from 'lucide-react';
 import { 
@@ -482,7 +483,7 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
               </p>
             </div>
           </div>
-          <table className="w-full text-left text-sm whitespace-nowrap">
+          <Paged items={skillComparisonRows} unit="สกิล" resetKey={`${empAId}|${empBId}|${startYear}|${endYear}|${department}|${wi}|${type}`}>{({ off, bar }) => <><table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="p-4" rowSpan={2}>W/I</th>
@@ -508,8 +509,8 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
               </tr>
             </thead>
             <tbody>
-              {skillComparisonRows.map(row => (
-                <tr key={row.key} className="border-t border-slate-100 hover:bg-slate-50/50">
+              {skillComparisonRows.map((row, index) => (
+                <tr key={row.key} className={`border-t border-slate-100 hover:bg-slate-50/50 ${off(index)}`}>
                   <td className="p-4 font-mono font-medium">{row.wiCode}</td>
                   <td className="p-4 max-w-xs truncate" title={row.wiName}>{row.wiName}</td>
                   <td className="p-4">{row.typeCode} · {row.typeName}</td>
@@ -547,7 +548,7 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
                 </td>
               </tr>
             </tfoot>
-          </table>
+          </table>{bar}</>}</Paged>
         </div>
       ) : (
         <div className={`${panelClass} overflow-x-auto`}>

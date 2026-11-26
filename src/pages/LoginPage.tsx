@@ -1,3 +1,4 @@
+import webparkLogo from '../assets/webpark-logo-horizontal.png';
 import { Avatar } from '../components/Avatar';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
@@ -28,7 +29,7 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (role: string) =
   }
   return <main className="login-screen grid min-h-svh bg-white md:grid-cols-[0.42fr_0.58fr] print:hidden">
     <section className="flex flex-col border-b border-blue-100 bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100/50 px-5 py-4 md:border-b-0 md:border-r md:px-8 md:py-6 xl:px-12">
-      <div className="flex items-center gap-4"><div className="rounded-lg border border-blue-100 bg-white px-3 py-2 text-xl font-bold tracking-tight text-blue-800">DAIHEN</div><div><p className="text-base font-bold text-slate-800">Skill Matrix</p><p className="mt-0.5 text-xs text-slate-500">ระบบพัฒนาทักษะบุคลากร</p></div></div>
+      <div className="flex flex-col items-start gap-2"><img src={webparkLogo} alt="Webpark" width={5541} height={1459} className="h-auto w-56 max-w-full"/><div><p className="text-base font-bold text-slate-800">Skill Matrix</p><p className="mt-0.5 text-xs text-slate-500">ระบบพัฒนาทักษะบุคลากร</p></div></div>
       <div className="mx-auto hidden w-full max-w-md flex-1 flex-col justify-center py-8 md:flex">
         <span className="mb-3 self-start text-xs font-semibold tracking-widest text-blue-700">PEOPLE & SKILLS</span>
         <h1 className="text-2xl font-bold leading-snug tracking-tight text-slate-900 xl:text-4xl">พัฒนาทักษะของทีม<br/><span className="text-blue-700">อย่างเป็นระบบ</span></h1>

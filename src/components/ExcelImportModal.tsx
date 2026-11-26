@@ -1,3 +1,4 @@
+import { Paged } from './Paged';
 import { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import {
@@ -516,7 +517,7 @@ export function ExcelImportModal({
               </div>
 
               {/* Validation Table */}
-              <div className="overflow-x-auto rounded-xl border border-slate-200 max-h-80">
+              <Paged items={displayedRows} unit="แถว" resetKey={String(displayedRows.length)}>{({ rows: shown, bar }) => <div className="overflow-hidden rounded-xl border border-slate-200"><div className="max-h-80 overflow-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 sticky top-0 z-10">
                     <tr>
@@ -530,7 +531,7 @@ export function ExcelImportModal({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {displayedRows.map(row => (
+                    {shown.map(row => (
                       <tr
                         key={row.rowNumber}
                         className={row.isValid ? 'hover:bg-slate-50/50' : 'bg-red-50/40 hover:bg-red-50/60'}
@@ -570,7 +571,7 @@ export function ExcelImportModal({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </div>{bar}</div>}</Paged>
 
               {invalidRows.length > 0 && (
                 <div

@@ -1,3 +1,4 @@
+import { Paged } from '../components/Paged';
 import { FilterBar } from '../components/FilterBar';
 import { useState } from 'react';
 import { CheckSquare, Check, X, SlidersHorizontal, AlertCircle } from 'lucide-react';
@@ -108,7 +109,7 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
       {!requests.length ? (
         <EmptyState>ไม่มีคำขอในสถานะที่เลือก</EmptyState>
       ) : (
-        requests.map(a => {
+        <Paged items={requests} size={5} boxed unit="คำขอ" resetKey={status}>{({ rows, bar }) => <>{rows.map(a => {
           const targetEmployee = employees.find(e => e.id === a.employeeId);
           const targetName = targetEmployee?.name ?? a.employeeId;
           const isPending = a.status === 'pending';
@@ -297,7 +298,7 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
               )}
             </article>
           );
-        })
+        })}{bar}</>}</Paged>
       )}
     </div>
   );

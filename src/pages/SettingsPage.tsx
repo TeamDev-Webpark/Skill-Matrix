@@ -23,9 +23,9 @@ export function SettingsPage({ onNavigateToPermissions }: { onNavigateToPermissi
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [generalConfig, setGeneralConfig] = useState({
-    companyNameTh: 'บริษัท ไดเฮ็น อิเล็คทริค จำกัด',
-    companyNameEn: 'Thai Daihen Electric Co., Ltd.',
-    isoDocPrefix: 'TDE-SKM',
+    companyNameTh: '',
+    companyNameEn: '',
+    isoDocPrefix: 'SKM',
     passScorePercentage: 80,
     annualReviewMonth: 'October',
     autoUpgradeLevel1: true,
