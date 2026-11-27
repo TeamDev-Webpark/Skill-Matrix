@@ -14,3 +14,8 @@ export function Can({ id, action = 'view', children }: { id: string; action?: Pe
   const access = useContext(AccessContext);
   return !access || allowed(access.role, access.page, id, action) ? <>{children}</> : null;
 }
+/** ใช้ซ่อนทางลัดไปหน้าที่บทบาทปัจจุบันเปิดไม่ได้ */
+export function useCanVisit() {
+  const access = useContext(AccessContext);
+  return (pageId: string) => !access || allowed(access.role, pageId);
+}

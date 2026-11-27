@@ -63,7 +63,7 @@ export const PAGE_COMPONENTS: Record<string, PermComponent[]> = {
   'manager-job-summary': jobSummary,
   'manager-people-directory': directory,
   // ---------- Admin ----------
-  'admin-home': [header, metrics, c('shortcuts', 'การ์ดทางลัด')],
+  'admin-home': [header, metrics, c('attention', 'เรื่องที่ควรตรวจ'), c('departments', 'พนักงานแยกตามแผนก'), c('learning', 'สถานะการเรียนออนไลน์'), c('activity', 'ความเคลื่อนไหวล่าสุด'), c('shortcuts', 'ทางลัด')],
   'admin-employees': [header, c('actions', 'ปุ่มนำเข้าและเพิ่มพนักงาน', { create: 'นำเข้า Excel / เพิ่มพนักงาน' }), filters, c('table', 'ตารางพนักงาน', { edit: 'แก้ไขข้อมูลพนักงาน' }), c('history', 'ปุ่มประวัติการโอนย้าย')],
   'admin-master-data': [header, c('wi', 'ตาราง Work Instruction', { create: 'เพิ่ม W/I', edit: 'แก้ไข W/I', delete: 'เก็บถาวร W/I' }), c('types', 'Skill Types Master', { create: 'เพิ่มประเภทสกิล', edit: 'แก้ไขประเภทสกิล', delete: 'เก็บถาวรประเภทสกิล' })],
   'admin-skill-audit': skillApprovals,
