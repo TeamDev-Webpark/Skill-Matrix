@@ -1,3 +1,4 @@
+import { Can } from '../components/Permission';
 import { Paged } from '../components/Paged';
 import { FilterBar } from '../components/FilterBar';
 import { useState } from 'react';
@@ -74,7 +75,7 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap justify-between gap-4">
+      <Can id="header"><div className="flex flex-wrap justify-between gap-4">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-800">
             <CheckSquare />
@@ -84,9 +85,9 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
             ตรวจสอบระดับที่หัวหน้างานเสนอ สามารถปรับแก้คะแนน 0–3 ได้โดยตรงก่อนกดยืนยันอนุมัติ
           </p>
         </div>
-      </div>
+      </div></Can>
 
-      <FilterBar title="ตัวกรองคำขอปรับคะแนน" onReset={() => setStatus(userRole === 'admin' ? 'ALL' : 'pending')}>
+      <Can id="filters"><FilterBar title="ตัวกรองคำขอปรับคะแนน" onReset={() => setStatus(userRole === 'admin' ? 'ALL' : 'pending')}>
         <Field label="สถานะคำขอ">
           <select className={inputClass} value={status} onChange={e => setStatus(e.target.value)}>
             <option value="pending">รออนุมัติ</option>
@@ -95,21 +96,21 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
             <option value="ALL">ทั้งหมด</option>
           </select>
         </Field>
-      </FilterBar>
+      </FilterBar></Can>
 
-      {userRole === 'admin' && (
+      <Can id="header">{userRole === 'admin' && (
         <p className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800">
           ผู้ดูแลระบบดูรายการได้ ผู้จัดการเป็นผู้อนุมัติและปรับแก้คะแนน
         </p>
-      )}
+      )}</Can>
 
       {error && <p role="alert" className="rounded-lg bg-red-50 p-4 text-red-700">{error}</p>}
       {message && <p role="status" className="rounded-lg bg-emerald-50 p-4 text-emerald-800">{message}</p>}
 
       {!requests.length ? (
-        <EmptyState>ไม่มีคำขอในสถานะที่เลือก</EmptyState>
+        <Can id="list"><EmptyState>ไม่มีคำขอในสถานะที่เลือก</EmptyState></Can>
       ) : (
-        <Paged items={requests} size={5} boxed unit="คำขอ" resetKey={status}>{({ rows, bar }) => <>{rows.map(a => {
+        <Can id="list"><Paged items={requests} size={5} boxed unit="คำขอ" resetKey={status}>{({ rows, bar }) => <>{rows.map(a => {
           const targetEmployee = employees.find(e => e.id === a.employeeId);
           const targetName = targetEmployee?.name ?? a.employeeId;
           const isPending = a.status === 'pending';
@@ -270,7 +271,7 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
                       placeholder="ระบุข้อเสนอแนะ หรือเหตุผลในการปรับแก้/ไม่อนุมัติคะแนน..."
                     />
                   </Field>
-                  <div className="flex justify-end gap-2">
+                  <Can id="list" action="edit"><div className="flex justify-end gap-2">
                     <button
                       type="button"
                       onClick={() => decide(a.id, 'rejected')}
@@ -287,7 +288,7 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
                       <Check size={16} />
                       {modCount > 0 ? `อนุมัติคะแนน (บันทึก ${modCount} รายการที่ปรับแก้)` : 'อนุมัติคะแนน'}
                     </button>
-                  </div>
+                  </div></Can>
                 </div>
               ) : (
                 a.reviewedAt && (
@@ -298,7 +299,7 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
               )}
             </article>
           );
-        })}{bar}</>}</Paged>
+        })}{bar}</>}</Paged></Can>
       )}
     </div>
   );

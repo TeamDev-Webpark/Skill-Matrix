@@ -1,11 +1,12 @@
 import type { Course } from './lmsCore';
+import { articleImages } from './lmsContent';
 
 /**
  * คลังไฟล์สื่อ (วิดีโอ/รูป) ของ LMS เก็บใน IndexedDB ของเบราว์เซอร์ ข้อมูลหลักสูตรอ้างอิงด้วย 'idb:<uuid>'
  * ข้อจำกัด: ไฟล์อยู่เฉพาะเบราว์เซอร์/เครื่องที่อัปโหลด ถ้าต้องแชร์ข้ามเครื่องต้องย้ายไปเก็บบน server
  */
 const DB_NAME = 'skillmatrix-lms-media'; const STORE = 'files';
-export const MAX_VIDEO_MB = 500; export const MAX_IMAGE_MB = 10;
+export const MAX_VIDEO_MB = 500; export const MAX_IMAGE_MB = 10; export const MAX_PDF_MB = 30;
 export const VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-m4v'];
 
 export const isMediaRef = (value?: string | null): value is string => !!value && value.startsWith('idb:');
@@ -46,7 +47,7 @@ export function collectMediaRefs(courses: Course[]): Set<string> {
   const refs = new Set<string>();
   const add = (v?: string) => { if (isMediaRef(v)) refs.add(v); };
   for (const c of courses) {
-    c.lessons.forEach(l => add(l.videoUrl));
+    c.lessons.forEach(l => { add(l.videoUrl); l.attachments?.forEach(a => add(a.ref)); articleImages(l.body).forEach(add); });
     c.questions.forEach(q => { add(q.image); q.choiceImages?.forEach(add); });
   }
   return refs;
@@ -64,6 +65,10 @@ export async function prepareImage(file: File): Promise<Blob> {
   ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close();
   const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/webp', 0.85));
   return blob && blob.size < file.size ? blob : file;
+}
+export function validatePdfFile(file: File) {
+  if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) throw new Error('รองรับไฟล์ .pdf เท่านั้น');
+  if (file.size > MAX_PDF_MB * 1024 * 1024) throw new Error(`ไฟล์ใหญ่เกิน ${MAX_PDF_MB} MB`);
 }
 export function validateVideoFile(file: File) {
   if (!VIDEO_TYPES.includes(file.type) && !/\.(mp4|webm|ogg|mov|m4v)$/i.test(file.name)) throw new Error('รองรับไฟล์ .mp4 .webm .ogg .mov เท่านั้น');

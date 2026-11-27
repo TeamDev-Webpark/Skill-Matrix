@@ -5,6 +5,8 @@ import { COURSE_CATEGORIES, emptyCheckpoint, emptyLesson, moveItem, validateCour
 import type { Checkpoint, Course, Lesson } from '../../data/lmsCore';
 import { MAX_VIDEO_MB, readVideoDuration, saveMedia, validateVideoFile } from '../../data/lmsMedia';
 import QuestionBuilder from './QuestionBuilder';
+import ArticleEditor from './ArticleEditor';
+import { AttachmentEditor } from './Attachments';
 import { useMediaUrl } from './useMedia';
 import { buttonClass, Field, inputClass, panelClass } from '../Phase1Shared';
 import { CourseStatusBadge } from './LmsShared';
@@ -64,7 +66,7 @@ function VideoSettings({ lesson, onChange }: { lesson: Lesson; onChange: (l: Les
 function LessonEditor({ lesson, index, count, open, onToggle, onChange, onMove, onDelete }: { lesson: Lesson; index: number; count: number; open: boolean; onToggle: () => void; onChange: (l: Lesson) => void; onMove: (d: -1 | 1) => void; onDelete: () => void }) {
   const src = lesson.type === 'video' && lesson.videoUrl?.trim() ? parseVideoSource(lesson.videoUrl) : null;
   return <div className={`${panelClass} p-4`}>
-    <div className="flex flex-wrap items-center justify-between gap-2"><button type="button" onClick={onToggle} aria-expanded={open} className="flex items-center gap-2 text-left font-semibold text-slate-800">{lesson.type === 'video' ? <PlayCircle size={16} className="text-blue-600"/> : <FileText size={16} className="text-blue-600"/>}{index + 1}. {lesson.title || '(ยังไม่ตั้งชื่อ)'}<span className="text-xs font-normal text-slate-500">{lesson.type === 'video' ? 'วิดีโอ' : 'บทความ'} · {lesson.durationMin} นาที</span></button>
+    <div className="flex flex-wrap items-center justify-between gap-2"><button type="button" onClick={onToggle} aria-expanded={open} className="flex items-center gap-2 text-left font-semibold text-slate-800">{lesson.type === 'video' ? <PlayCircle size={16} className="text-blue-600"/> : <FileText size={16} className="text-blue-600"/>}{index + 1}. {lesson.title || '(ยังไม่ตั้งชื่อ)'}<span className="text-xs font-normal text-slate-500">{lesson.type === 'video' ? 'วิดีโอ' : 'บทความ'} · {lesson.durationMin} นาที{lesson.attachments?.length ? ` · แนบ ${lesson.attachments.length} ไฟล์` : ''}</span></button>
       <Toolbar index={index} count={count} onMove={onMove} onDelete={onDelete} label="บทเรียน"/></div>
     {open && <div className="mt-4 space-y-4">
       <div className="grid gap-3 md:grid-cols-[1fr_8rem_8rem]"><Field label="ชื่อบทเรียน"><input className={inputClass} value={lesson.title} onChange={e => onChange({ ...lesson, title: e.target.value })}/></Field>
@@ -72,7 +74,9 @@ function LessonEditor({ lesson, index, count, open, onToggle, onChange, onMove, 
         <Field label="ชนิด"><select className={inputClass} value={lesson.type} onChange={e => { const type = e.target.value as Lesson['type']; onChange({ ...lesson, type, minSeconds: type === 'article' ? Math.max(lesson.minSeconds, 30) : 0 }); }}><option value="article">บทความ</option><option value="video">วิดีโอ</option></select></Field></div>
       {lesson.type === 'video' && <VideoSettings lesson={lesson} onChange={onChange}/>}
       <Field label="วัตถุประสงค์ (บรรทัดละ 1 ข้อ)"><textarea rows={3} className={inputClass} value={lesson.objectives.join('\n')} onChange={e => onChange({ ...lesson, objectives: e.target.value.split('\n') })} onBlur={e => onChange({ ...lesson, objectives: e.target.value.split('\n').map(x => x.trim()).filter(Boolean) })}/></Field>
-      <Field label={lesson.type === 'article' ? 'เนื้อหา (ขึ้นบรรทัดใหม่ = ย่อหน้า · ขึ้นต้นด้วย "- " = หัวข้อย่อย)' : 'เนื้อหาประกอบวิดีโอ (ไม่บังคับ)'}><textarea rows={lesson.type === 'article' ? 8 : 3} className={inputClass} value={lesson.body} onChange={e => onChange({ ...lesson, body: e.target.value })}/></Field>
+      <ArticleEditor key={lesson.id} label={lesson.type === 'article' ? 'เนื้อหาบทความ' : 'เนื้อหาประกอบวิดีโอ (ไม่บังคับ)'} rows={lesson.type === 'article' ? 12 : 4} value={lesson.body} onChange={body => onChange({ ...lesson, body })}/>
+      <AttachmentEditor files={lesson.attachments ?? []} onChange={attachments => onChange({ ...lesson, attachments })}/>
+      {lesson.type === 'article' && !!lesson.attachments?.some(a => a.kind === 'pdf') && <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={!!lesson.requireOpen} onChange={e => onChange({ ...lesson, requireOpen: e.target.checked })}/>ผู้เรียนต้องเปิดอ่าน PDF ครบทุกไฟล์ก่อนกดจบบทเรียน</label>}
       {lesson.type === 'article' && <Field label="เวลาขั้นต่ำที่ต้องอ่าน (วินาที)"><input type="number" min={0} className={`${inputClass} max-w-40`} value={lesson.minSeconds} onChange={e => onChange({ ...lesson, minSeconds: Math.max(0, Number(e.target.value) || 0) })}/></Field>}
       {lesson.type === 'video' && <div className="space-y-3"><div className="flex items-center justify-between"><p className="text-sm font-semibold text-slate-700">จุดคำถามระหว่างวิดีโอ ({lesson.checkpoints.length})</p><button type="button" className="inline-flex items-center gap-1 text-sm text-blue-700 hover:underline" onClick={() => onChange({ ...lesson, checkpoints: [...lesson.checkpoints, emptyCheckpoint((lesson.checkpoints.at(-1)?.timeSec ?? 0) + 30)] })}><Plus size={14}/>เพิ่มจุดคำถาม</button></div>
         {lesson.checkpoints.map((cp, i) => <CheckpointEditor key={cp.id} cp={cp} index={i} count={lesson.checkpoints.length} onChange={x => onChange({ ...lesson, checkpoints: lesson.checkpoints.map(k => k.id === cp.id ? x : k) })} onMove={d => onChange({ ...lesson, checkpoints: moveItem(lesson.checkpoints, i, d) })} onDelete={() => onChange({ ...lesson, checkpoints: lesson.checkpoints.filter(k => k.id !== cp.id) })}/>)}</div>}

@@ -1,3 +1,4 @@
+import { Can } from '../../components/Permission';
 import { ACTORS, bangkokYear, employeesForYear, visibleEmployees } from '../../data/phase1Core';
 import { useSkillState } from '../../data/phase1Store';
 import { RolePageIntro } from '../../components/RolePageIntro';
@@ -13,4 +14,4 @@ export function ChiefHomePage({onNavigate}:{onNavigate:(page:string)=>void}) {
 export function ChiefTeamSkillsPage(){return <PhaseOneMatrix userRole="chief" title="ดูคะแนนรายแผนก"/>;}
 export function ChiefYearlyPage(){return <YearlySkill userRole="chief" title="พัฒนาการของทีม"/>;}
 export function ChiefJobSummaryPage(){return <JobSummary userRole="chief" title="สรุปความสามารถทีมตามงาน"/>;}
-export function ChiefDirectoryPage(){const team=useChiefTeam();return <div className="space-y-5"><RolePageIntro title="รายชื่อพนักงานในทีม" description={`ข้อมูลพนักงานใน ${ACTORS.chief.department} สำหรับติดตามและประเมินความสามารถ`}/><PeopleDirectory employees={team}/></div>;}
+export function ChiefDirectoryPage(){const team=useChiefTeam();return <div className="space-y-5"><Can id="header"><RolePageIntro title="รายชื่อพนักงานในทีม" description={`ข้อมูลพนักงานใน ${ACTORS.chief.department} สำหรับติดตามและประเมินความสามารถ`}/></Can><PeopleDirectory employees={team}/></div>;}

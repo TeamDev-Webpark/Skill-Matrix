@@ -1,3 +1,4 @@
+import { Can } from '../../components/Permission';
 import { bangkokYear, employeesForYear } from '../../data/phase1Core';
 import { useSkillState } from '../../data/phase1Store';
 import { RolePageIntro } from '../../components/RolePageIntro';
@@ -13,4 +14,4 @@ export function ManagerIndividualScoresPage(){return <PhaseOneMatrix userRole="m
 export function ManagerSectionSkillsPage(){return <PhaseOneMatrix userRole="manager" title="ดูคะแนนรายแผนก"/>;}
 export function ManagerYearlyPage(){return <YearlySkill userRole="manager" title="แนวโน้มทักษะรายแผนก"/>;}
 export function ManagerJobSummaryPage(){return <JobSummary userRole="manager" title="รายงานความสามารถตามงาน"/>;}
-export function ManagerDirectoryPage(){const employees=employeesForYear(useSkillState(),bangkokYear());return <div className="space-y-5"><RolePageIntro title="ข้อมูลบุคลากรประกอบการพิจารณา" description="ข้อมูลบุคลากรสำหรับตรวจผลประเมินและวางแผนพัฒนา"/><PeopleDirectory employees={employees}/></div>;}
+export function ManagerDirectoryPage(){const employees=employeesForYear(useSkillState(),bangkokYear());return <div className="space-y-5"><Can id="header"><RolePageIntro title="ข้อมูลบุคลากรประกอบการพิจารณา" description="ข้อมูลบุคลากรสำหรับตรวจผลประเมินและวางแผนพัฒนา"/></Can><PeopleDirectory employees={employees}/></div>;}

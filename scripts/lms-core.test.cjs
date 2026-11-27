@@ -9,6 +9,7 @@ const core=load(path.resolve('src/data/lmsCore.ts'));
 const {lmsSeed}=load(path.resolve('src/data/lmsSeed.ts'));
 const {addDemoHistory}=load(path.resolve('src/data/lmsDemoHistory.ts'));
 const {addDemoCourses}=load(path.resolve('src/data/lmsDemoCourses.ts'));
+const {addDemoPractical}=load(path.resolve('src/data/lmsDemoPractical.ts'));
 const {lmsAnalytics}=load(path.resolve('src/data/lmsAnalytics.ts'));
 const now=new Date('2026-10-14T04:00:00Z');
 const staff={id:'EMP001',name:'นายสมชาย ใจดี',department:'QC Section'};
@@ -253,4 +254,43 @@ test('every added course can be published, edited, enrolled, completed and passe
     assert.equal(result.attempt.score, 100, course.code);
     assert.equal(result.state.enrollments.at(-1).status, 'pending-chief', course.code);
   }
+});
+
+test('practical demo data covers each stage for the demo chief reports and is added once',()=>{
+  const next=addDemoPractical(lmsSeed(now),now);
+  const demo=next.enrollments.filter(e=>e.id.startsWith('ENR-DEMO-'));
+  assert.equal(demo.length,6);
+  const stage=e=>core.practicalStage(next.courses.find(c=>c.id===e.courseId),e,0);
+  assert.deepEqual([...new Set(demo.map(stage))].sort(),['evaluate','failed','propose']);
+  for(const c of next.courses.filter(c=>c.id.startsWith('CRS-OJT-')))assert.deepEqual(core.validateCourse(c,next.courses,true),[]);
+  assert.equal(addDemoPractical(next,now).enrollments.length,next.enrollments.length);
+});
+
+test('article parser and bulk question import',()=>{
+  const {parseArticle,parseQuestionText,articleImages,safeImageSrc}=load(path.resolve('src/data/lmsContent.ts'));
+  const blocks=parseArticle('## หัว\nย่อหน้า\n- ก\n- ข\n1. หนึ่ง\n2. สอง\n> เตือน\n![รูป](/demo-lms/a.png)');
+  assert.deepEqual(blocks.map(b=>b.type),['heading','paragraph','bullets','numbers','callout','image']);
+  assert.deepEqual(articleImages('![x](idb:abc)'),['idb:abc']);
+  assert.ok(safeImageSrc('/demo-lms/a.png'));assert.ok(!safeImageSrc('javascript:alert(1)'));assert.ok(!safeImageSrc('//evil.example/a.png'));
+  const r=parseQuestionText('1. คำถามเดียว\na) ผิด\n*b) ถูกต้อง\nอธิบาย: เพราะ\n\nหลายข้อ\n*ก) หนึ่ง\n*ข) สอง\nค) สาม\nคะแนน: 2\n\nเติมคำ\nตอบ: 500 | ห้าร้อย\n\nจริงไหม\n- ถูก\n*- ผิด');
+  assert.deepEqual(r.errors,[]);
+  assert.deepEqual(r.questions.map(q=>q.type),['single','multiple','short','truefalse']);
+  assert.deepEqual(r.questions[0].correct,[1]);assert.equal(r.questions[0].text,'คำถามเดียว');assert.equal(r.questions[1].points,2);
+  assert.equal(parseQuestionText('ไม่มีเฉลย\na) 1\nb) 2').errors.length,1);
+});
+test('media demo courses are publishable, reference files that exist and survive media cleanup',()=>{
+  const fs=require('node:fs');
+  const {addDemoMediaCourses}=load(path.resolve('src/data/lmsDemoMedia.ts'));
+  const {collectMediaRefs}=load(path.resolve('src/data/lmsMedia.ts'));
+  const {parseVideoSource}=load(path.resolve('src/components/lms/videoSource.ts'));
+  const next=addDemoMediaCourses(lmsSeed(now));
+  const media=next.courses.filter(c=>c.id.startsWith('CRS-MEDIA-'));assert.equal(media.length,2);
+  for(const c of media){
+    assert.deepEqual(core.validateCourse(c,next.courses,true),[]);
+    for(const ref of JSON.stringify(c).match(/\/demo-lms\/[\w.-]+/g))assert.ok(fs.existsSync(path.resolve('public'+ref)),ref);
+    for(const l of c.lessons)if(l.type==='video')assert.equal(parseVideoSource(l.videoUrl).kind,'direct');
+  }
+  const refs=collectMediaRefs([{...media[0],questions:[],lessons:[{videoUrl:'idb:v',body:'![a](idb:img)',attachments:[{ref:'idb:pdf'}],checkpoints:[]}]}]);
+  assert.deepEqual([...refs].sort(),['idb:img','idb:pdf','idb:v']);
+  assert.equal(addDemoMediaCourses(next).courses.length,next.courses.length);
 });

@@ -1,3 +1,4 @@
+import { Can } from '../components/Permission';
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Settings, ShieldAlert, Check, RefreshCw, Layers, ArrowLeft, Save, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FilterBar, FilterToggle } from '../components/FilterBar';
@@ -219,29 +220,29 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+        <Can id="header"><div>
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
             <Settings className="text-[#0a2540]" /> จัดการข้อมูลพื้นฐาน (Master Data)
           </h1>
           <p className="text-slate-500 text-sm mt-1">
             ศูนย์กลางกำหนดมาตรฐานคู่มือปฏิบัติงาน (Work Instruction) และสเปก Skill Types ย่อย (เฉพาะ Admin)
           </p>
-        </div>
+        </div></Can>
 
         {!isFormOpen && (
           <div className="flex items-center gap-3">
-            <button
+            <Can id="wi" action="create"><button
               onClick={handleOpenAddForm}
               className="flex items-center gap-2 px-5 py-2.5 bg-[#0a2540] hover:bg-[#0d3060] text-white rounded-lg transition-colors font-semibold shadow-md text-sm"
             >
               <Plus size={18} /> เพิ่ม Work Instruction ใหม่
-            </button>
+            </button></Can>
           </div>
         )}
       </div>
 
       {/* Notice Banner */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+      <Can id="header"><div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
         <div className="text-amber-500 mt-0.5 flex-shrink-0"><ShieldAlert size={20} /></div>
         <div className="text-sm text-amber-900 space-y-0.5">
           <div className="font-bold">พื้นที่เฉพาะผู้ดูแลระบบ (Admin Only - Full Control)</div>
@@ -249,7 +250,7 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
             ข้อมูลโครงสร้างมาตรฐาน W/I ในหน้านี้จะถูกดึงไปใช้ประเมินทักษะใน Skill Matrix, OJT Form และการประมวลผลประจำปี การ Soft-delete จะไม่กระทบประวัติย้อนหลังใน Audit Trail
           </div>
         </div>
-      </div>
+      </div></Can>
 
       {/* INLINE FORM: Add / Edit Work Instruction (No Popup Modal!) */}
       {isFormOpen && (
@@ -432,7 +433,7 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
 
         {/* LEFT / MAIN SECTION (8 Columns): Work Instructions List */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-4">
+          <Can id="wi"><div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-4">
             
             <FilterBar title="ค้นหามาตรฐานงาน W/I" onReset={()=>{setSearchQuery('');setDeptFilter('ALL');setShowArchived(false);setCurrentPage(1);}} footer={<FilterToggle checked={showArchived} onChange={checked=>{setShowArchived(checked);setCurrentPage(1);}}>รวมรายการที่เก็บเข้าคลัง</FilterToggle>}>
               <Field label="ค้นหามาตรฐานงาน"><input placeholder="รหัส W/I ชื่อขั้นตอน หรือหมวดหมู่" value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);setCurrentPage(1);}} className={inputClass}/></Field>
@@ -513,15 +514,15 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
 
                           <td className="px-4 py-3.5 text-center whitespace-nowrap">
                             <div className="flex items-center justify-center gap-1.5">
-                              <button
+                              <Can id="wi" action="edit"><button
                                 onClick={() => handleOpenEditForm(wi)}
                                 title="แก้ไข W/I"
                                 className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-200"
                               >
                                 <Edit size={16} />
-                              </button>
+                              </button></Can>
 
-                              <button
+                              <Can id="wi" action="delete"><button
                                 onClick={() => handleToggleArchiveWI(wi.id, wi.status)}
                                 title={isArchived ? "คืนค่า W/I" : "Soft-delete (ย้ายเข้าคลัง)"}
                                 className={`p-1.5 rounded-lg transition-colors border ${
@@ -531,7 +532,7 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
                                 }`}
                               >
                                 {isArchived ? <RefreshCw size={16} /> : <Trash2 size={16} />}
-                              </button>
+                              </button></Can>
                             </div>
                           </td>
                         </tr>
@@ -553,18 +554,18 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
               itemLabel="รายการ"
             />
 
-          </div>
+          </div></Can>
         </div>
 
         {/* RIGHT SECTION (4 Columns): Skill Types Master Card */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4 sticky top-6">
+          <Can id="types"><div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4 sticky top-6">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
                 <h2 className="text-base font-bold text-slate-800">Skill Types Master</h2>
                 <p className="text-xs text-slate-500">ประเภททักษะย่อยมาตรฐานที่ดึงไปผูก W/I</p>
               </div>
-              <button
+              <Can id="types" action="create"><button
                 onClick={() => {
                   setEditingSkillCode(null);
                   setTypeForm({ code: '', name: '', description: '' });
@@ -573,7 +574,7 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
                 className="p-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors font-bold text-xs flex items-center gap-1 border border-blue-200"
               >
                 <Plus size={14} /> เพิ่ม
-              </button>
+              </button></Can>
             </div>
 
             {/* Add/Edit Skill Type Form */}
@@ -662,7 +663,7 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
                       </div>
                       
                       <div className="flex items-center gap-1">
-                        <button
+                        <Can id="types" action="edit"><button
                           onClick={() => {
                             setEditingSkillCode(st.code);
                             setTypeForm({ code: st.code, name: st.name, description: st.description || '' });
@@ -671,13 +672,13 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
                           className="p-1 text-slate-500 hover:text-blue-600 rounded"
                         >
                           <Edit size={13} />
-                        </button>
-                        <button
+                        </button></Can>
+                        <Can id="types" action="delete"><button
                           onClick={() => handleToggleArchiveType(st.code)}
                           className="p-1 text-slate-500 hover:text-red-500 rounded"
                         >
                           {isArchived ? <RefreshCw size={13} /> : <Trash2 size={13} />}
-                        </button>
+                        </button></Can>
                       </div>
                     </div>
 
@@ -692,7 +693,7 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
             <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-400 text-center">
               สามารถเพิ่ม Skill Type ย่อยใหม่ (เช่น E, F...) เพื่อนำไปใช้กับ W/I ใหม่ได้ตลอดเวลา
             </div>
-          </div>
+          </div></Can>
         </div>
 
       </div>

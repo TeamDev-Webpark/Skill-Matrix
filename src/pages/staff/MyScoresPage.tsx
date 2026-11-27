@@ -1,3 +1,4 @@
+import { Can } from '../../components/Permission';
 import { Paged } from '../../components/Paged';
 import { FilterBar, FilterToggle } from '../../components/FilterBar';
 import { useState } from 'react';
@@ -68,11 +69,11 @@ export default function MyScoresPage() {
   const independent = assessment.rows.filter(row => row.level >= 2).length;
 
   return <div className="space-y-5">
-    <div>
+    <Can id="header"><div>
       <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-800"><User/>ดูคะแนนของฉัน</h1>
       <p className="mt-1 text-sm text-slate-500">ดูคะแนนที่ยืนยันแล้วและทบทวนทักษะของตนเอง · ปี {currentYear} (เปรียบเทียบผลต่างกับปี {prevYear})</p>
-    </div>
-    <div className={`${panelClass} flex flex-wrap items-center justify-between gap-4 p-5`}>
+    </div></Can>
+    <Can id="profile"><div className={`${panelClass} flex flex-wrap items-center justify-between gap-4 p-5`}>
       <div className="flex items-center gap-4">
         <Avatar src={employee.avatarUrl} name={employee.name} size="lg" className="ring-2 ring-white shadow-xs" />
         <div>
@@ -81,18 +82,18 @@ export default function MyScoresPage() {
         </div>
       </div>
       <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">คะแนนที่ยืนยันแล้ว</span>
-    </div>
-    <div className="grid gap-4 md:grid-cols-3">
+    </div></Can>
+    <Can id="metrics"><div className="grid gap-4 md:grid-cols-3">
       <Metric label="คะแนนรวมทั้งหมด" value={`${assessment.total} / ${assessment.maximum}`} note={`รวมทุก ${assessment.rows.length} สกิล · สกิลละ 3 คะแนน`}/>
       <Metric label="สกิลที่ทำได้ด้วยตนเอง" value={`${independent} / ${assessment.rows.length}`} note="ระดับ 2–3: ทำงานเองได้ หรือสอนผู้อื่นได้"/>
       <Metric label="สกิลที่ต้องพัฒนา" value={assessment.rows.length - independent} note="ระดับ 0–1: ยังทำไม่ได้ หรือต้องมีผู้ดูแล"/>
-    </div>
-    <FilterBar title="ตัวกรองสกิลของฉัน" onReset={filtered?()=>{setWi('ALL');setType('ALL');setLevel('ALL');setOnDuty(false);}:undefined} resetLabel="แสดงทุกสกิล" footer={<><FilterToggle checked={onDuty} onChange={setOnDuty}>เฉพาะสกิลที่ได้รับมอบหมาย</FilterToggle><span className="text-xs text-slate-500">แสดง {rows.length} จาก {assessment.rows.length} สกิล</span></>}>
+    </div></Can>
+    <Can id="filters"><FilterBar title="ตัวกรองสกิลของฉัน" onReset={filtered?()=>{setWi('ALL');setType('ALL');setLevel('ALL');setOnDuty(false);}:undefined} resetLabel="แสดงทุกสกิล" footer={<><FilterToggle checked={onDuty} onChange={setOnDuty}>เฉพาะสกิลที่ได้รับมอบหมาย</FilterToggle><span className="text-xs text-slate-500">แสดง {rows.length} จาก {assessment.rows.length} สกิล</span></>}>
       <Field label="Work Instruction"><select className={inputClass} value={wi} onChange={event => { setWi(event.target.value); setType('ALL'); }}><option value="ALL">ทุก W/I</option>{workInstructions.map(([code, name]) => <option key={code} value={code}>{code} · {name}</option>)}</select></Field>
       <Field label="ประเภทสกิล"><select className={inputClass} value={type} onChange={event => setType(event.target.value)}><option value="ALL">ทุกประเภท</option>{availableTypes.map(code => <option key={code} value={code}>Skill Type {code}</option>)}</select></Field>
       <Field label="ระดับสกิล"><select className={inputClass} value={level} onChange={event => setLevel(event.target.value)}><option value="ALL">ทุกระดับ</option>{LEVEL_LABELS.map((label, value) => <option key={value} value={value}>{value} · {label}</option>)}</select></Field>
-    </FilterBar>
-    <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+    </FilterBar></Can>
+    <Can id="legend"><div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
       <span className="font-semibold text-slate-600">ระดับสกิล:</span>
       {LEVEL_LABELS.map((label, value) => <span key={value} className="flex items-center gap-1.5"><LevelBadge level={value}/>{label}</span>)}
       <span className="text-slate-300">|</span>
@@ -101,8 +102,8 @@ export default function MyScoresPage() {
       <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-red-50 px-1.5 py-0.5 text-[11px] font-bold text-red-700 border border-red-200">-</span> ลดลง</span>
       <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500 border border-slate-200">0</span> คงเดิม</span>
       <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-slate-50 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 border border-slate-200">N/A</span> ไม่มีข้อมูลปีก่อน</span>
-    </div>
-    <Paged items={groups.flatMap(group => group.rows)} unit="สกิล" resetKey={`${wi}|${type}|${level}|${onDuty}`}>{({ off, bar }) => {
+    </div></Can>
+    <Can id="table"><Paged items={groups.flatMap(group => group.rows)} unit="สกิล" resetKey={`${wi}|${type}|${level}|${onDuty}`}>{({ off, bar }) => {
     const order = groups.flatMap(group => group.rows.map(row => row.key));
     const onPage = (key: string) => off(order.indexOf(key)) === '';
     return <div className={`${panelClass} overflow-hidden`}><div className="overflow-x-auto">
@@ -120,7 +121,7 @@ export default function MyScoresPage() {
         {!rows.length && <tbody><tr><td colSpan={6} className="p-8 text-center text-slate-500">ไม่พบสกิลตามตัวกรองที่เลือก ลองเลือกทุกประเภทหรือทุกระดับ</td></tr></tbody>}
         <tfoot className="border-t-2 border-blue-200 bg-blue-100/70 font-bold text-blue-900"><tr data-score-total><th scope="row" colSpan={4} className="p-4">{filtered ? 'รวมคะแนนตามตัวกรอง' : 'รวมคะแนนทั้งหมด'} · {rows.length} สกิล</th><td className="p-4 text-center">{total} / {rows.length * 3}</td><td className="p-4"></td></tr></tfoot>
       </table>
-    </div>{bar}</div>; }}</Paged>
-    <p className="text-xs leading-6 text-slate-500">ใช้ระดับสกิลและคะแนนรวมเพื่อทบทวนตนเอง หากต้องการพัฒนาสกิลที่ยังทำไม่ได้หรือต้องมีผู้ดูแล สามารถยื่นขอฝึกอบรมได้ คะแนนจะแสดงตามผลที่ผู้จัดการยืนยันแล้ว</p>
+    </div>{bar}</div>; }}</Paged></Can>
+    <Can id="table"><p className="text-xs leading-6 text-slate-500">ใช้ระดับสกิลและคะแนนรวมเพื่อทบทวนตนเอง หากต้องการพัฒนาสกิลที่ยังทำไม่ได้หรือต้องมีผู้ดูแล สามารถยื่นขอฝึกอบรมได้ คะแนนจะแสดงตามผลที่ผู้จัดการยืนยันแล้ว</p></Can>
   </div>;
 }

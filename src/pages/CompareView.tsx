@@ -1,3 +1,4 @@
+import { Can } from '../components/Permission';
 import { Paged } from '../components/Paged';
 import { useState } from 'react';
 import { GitCompare, Users, Building2, TrendingUp, Calendar, ArrowRight } from 'lucide-react';
@@ -178,7 +179,7 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
   return (
     <div className="space-y-6">
       {/* Title */}
-      <div>
+      <Can id="header"><div>
         <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-800">
           <GitCompare className="text-blue-700" />
           {title}
@@ -186,10 +187,10 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
         <p className="mt-1 text-sm text-slate-500">
           เปรียบเทียบคะแนนและแนวโน้มระหว่างพนักงาน หรือระหว่างแผนก พร้อมเลือกช่วงปีได้อย่างอิสระ ({fromYear} เทียบ {toYear})
         </p>
-      </div>
+      </div></Can>
 
       {/* Mode Switcher */}
-      <div className="flex flex-wrap items-center gap-3">
+      <Can id="mode"><div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={() => setCompareMode('employee')}
@@ -214,10 +215,10 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
           <Building2 size={16} />
           เปรียบเทียบรายแผนก (แผนก A vs แผนก B)
         </button>
-      </div>
+      </div></Can>
 
       {/* Comparison Filters */}
-      <FilterBar
+      <Can id="filters"><FilterBar
         title={`ตัวเลือกการเปรียบเทียบ: ${compareMode === 'employee' ? 'พนักงาน' : 'แผนก'}`}
         onReset={() => {
           setStartYear(currentYear - 2 >= minSnapshotYear ? currentYear - 2 : minSnapshotYear);
@@ -363,11 +364,11 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
             ))}
           </select>
         </Field>
-      </FilterBar>
+      </FilterBar></Can>
 
       {/* Summary KPI Cards */}
       {compareMode === 'employee' ? (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <Can id="metrics"><div className="grid gap-4 sm:grid-cols-3">
           <Metric
             label={`พนักงาน A: ${empAEnd?.name ?? 'พนักงาน A'}`}
             value={`${totalScoreAEnd} คะแนน (ปี ${toYear})`}
@@ -389,9 +390,9 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
             }
             note={`เทียบภาพรวม ณ ปี ${toYear}`}
           />
-        </div>
+        </div></Can>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <Can id="metrics"><div className="grid gap-4 sm:grid-cols-3">
           <Metric
             label={`แผนก A: ${deptA}`}
             value={`เฉลี่ย ${deptASummaryEnd.averagePerPerson.toFixed(2)} คะแนน/คน`}
@@ -413,11 +414,11 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
             }
             note={`เทียบ ณ ปี ${toYear}`}
           />
-        </div>
+        </div></Can>
       )}
 
       {/* Multi-line Chart */}
-      <div className={`${panelClass} p-5 lg:p-6`}>
+      <Can id="chart"><div className={`${panelClass} p-5 lg:p-6`}>
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold text-slate-800">
@@ -470,11 +471,11 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </div></Can>
 
       {/* Detailed Comparison Table */}
       {compareMode === 'employee' ? (
-        <div className={`${panelClass} overflow-x-auto`}>
+        <Can id="table"><div className={`${panelClass} overflow-x-auto`}>
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h2 className="font-bold text-slate-800">ตารางเปรียบเทียบคะแนนรายสกิล ({fromYear} vs {toYear})</h2>
@@ -549,9 +550,9 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
               </tr>
             </tfoot>
           </table>{bar}</>}</Paged>
-        </div>
+        </div></Can>
       ) : (
-        <div className={`${panelClass} overflow-x-auto`}>
+        <Can id="table"><div className={`${panelClass} overflow-x-auto`}>
           <div className="p-5 border-b border-slate-100">
             <h2 className="font-bold text-slate-800">ตารางเปรียบเทียบสถิติและผลงานรายแผนก ({fromYear} vs {toYear})</h2>
             <p className="mt-1 text-xs text-slate-500">
@@ -626,7 +627,7 @@ export default function CompareView({ userRole, title = 'เปรียบเ�
               </tr>
             </tbody>
           </table>
-        </div>
+        </div></Can>
       )}
     </div>
   );

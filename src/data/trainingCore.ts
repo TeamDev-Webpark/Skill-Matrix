@@ -1,4 +1,4 @@
-import { ACTORS, SKILL_WIS } from './phase1Core';
+import { ACTORS, initialState, SKILL_WIS, visibleEmployees } from './phase1Core';
 import type { Role } from './phase1Core';
 
 export type TrainingStatus = 'requested' | 'scheduled' | 'rejected-chief' | 'pending-manager' | 'approved' | 'rejected-manager' | 'failed';
@@ -34,18 +34,22 @@ export function requestTraining(records: TrainingRequest[], role: Role, form: {w
   if(records.some(r=>r.employeeId===ACTORS.staff.employeeId && r.wiCode===form.wiCode && r.skillType===form.skillType && ['requested','scheduled','pending-manager'].includes(r.status))) throw new Error('มีคำขอฝึกอบรมสกิลนี้อยู่ระหว่างดำเนินการแล้ว');
   return [...records,{...form, reason:form.reason.trim(), id:`TR-${crypto.randomUUID()}`, employeeId:ACTORS.staff.employeeId, employeeName:ACTORS.staff.name, department:ACTORS.staff.department, submittedAt:now.toISOString(), status:'requested'}];
 }
-export function reviewTrainingRequest(records: TrainingRequest[], role: Role, id: string, approve: boolean, date: string, remark: string, now = new Date()): TrainingRequest[] {
+/** ลูกทีมตรงของ Chief ตัวอย่างจากข้อมูลตั้งต้น (store จะส่งรายชื่อปัจจุบันมาแทน) */
+const seedReports = () => visibleEmployees(initialState().snapshots[0].employees, 'chief').map(e => e.id);
+/** ขอบเขตงานอบรมของ Chief: เฉพาะลูกทีมตรง ใช้กติกาเดียวกันทุกหน้า ตัวนับ และการตรวจสิทธิ์ */
+export function chiefRequests(records: TrainingRequest[], reportIds: string[]) { return records.filter(r => reportIds.includes(r.employeeId)); }
+export function reviewTrainingRequest(records: TrainingRequest[], role: Role, id: string, approve: boolean, date: string, remark: string, now = new Date(), reportIds = seedReports()): TrainingRequest[] {
   if(role!=='chief') throw new Error('เฉพาะหัวหน้าที่ตรวจคำขอฝึกอบรมได้');
   const request=records.find(r=>r.id===id);
-  if(!request || request.status!=='requested' || request.department!==ACTORS.chief.department) throw new Error('ไม่พบคำขอที่รอหัวหน้าตรวจในแผนกของคุณ');
+  if(!request || request.status!=='requested' || !reportIds.includes(request.employeeId)) throw new Error('ไม่พบคำขอของลูกทีมตรงที่รอหัวหน้าตรวจ');
   if(approve && (!validDate(date) || date<bangkokDate(now))) throw new Error('กำหนดวันอบรมตั้งแต่วันนี้เป็นต้นไป');
   if(!approve && !remark.trim()) throw new Error('ระบุเหตุผลที่ไม่อนุมัติ');
   return records.map(r=>r.id===id ? {...r, status:approve?'scheduled':'rejected-chief', scheduledDate:approve?date:undefined, chiefName:ACTORS.chief.name, chiefRemark:remark.trim(), chiefReviewedAt:now.toISOString()} : r);
 }
-export function evaluateTraining(records: TrainingRequest[], role: Role, id: string, theory: number, practical: number, note: string, now = new Date()): TrainingRequest[] {
+export function evaluateTraining(records: TrainingRequest[], role: Role, id: string, theory: number, practical: number, note: string, now = new Date(), reportIds = seedReports()): TrainingRequest[] {
   if(role!=='chief') throw new Error('เฉพาะหัวหน้างานที่บันทึกผลการประเมินได้');
   const request=records.find(r=>r.id===id);
-  if(!request || request.status!=='scheduled' || request.department!==ACTORS.chief.department) throw new Error('ไม่พบรายการฝึกอบรมที่รอประเมิน');
+  if(!request || request.status!=='scheduled' || !reportIds.includes(request.employeeId)) throw new Error('ไม่พบรายการฝึกอบรมของลูกทีมตรงที่รอประเมิน');
   if(request.scheduledDate!>bangkokDate(now)) throw new Error('บันทึกผลได้ตั้งแต่วันอบรมที่กำหนด');
   if([theory,practical].some(n=>!Number.isFinite(n)||n<0||n>100)) throw new Error('คะแนนต้องอยู่ระหว่าง 0–100');
   if(!note.trim()) throw new Error('ระบุผลการประเมินหรือหลักฐานอ้างอิง');

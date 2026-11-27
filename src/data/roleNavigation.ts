@@ -4,7 +4,7 @@ const page=(id:string,title:string,purpose:string,group:string,icon:RolePage['ic
 export const ROLE_NAMES:Record<Role,string>={staff:'พื้นที่พนักงาน',chief:'พื้นที่หัวหน้างาน',manager:'พื้นที่ผู้จัดการ',admin:'พื้นที่ผู้ดูแลระบบ'};
 export const ROLE_PAGES:Record<Role,RolePage[]>={
   staff:[
-    page('staff-home','หน้าหลักของฉัน','ติดตามทักษะและคำขอฝึกอบรมของตนเอง','งานของฉัน','home'),
+    page('staff-home','หน้าหลักของฉัน','ติดตามทักษะ การเรียนออนไลน์ และการฝึกอบรมของตนเอง','งานของฉัน','home'),
     page('staff-my-skills','ดูคะแนนของฉัน','ดูคะแนนที่ยืนยันแล้วและคะแนนรวมเพื่อทบทวนทักษะของตนเอง','ดูคะแนนสกิล','people'),
     page('staff-yearly','พัฒนาการของฉัน','ดูคะแนนและประวัติการพัฒนารายปีของตนเอง','ทักษะของฉัน','yearly'),
     page('staff-training-request','ยื่นขอฝึกอบรม','เลือกงานที่ต้องการพัฒนาและส่งคำขอให้หัวหน้า','การฝึกอบรมของฉัน','request'),

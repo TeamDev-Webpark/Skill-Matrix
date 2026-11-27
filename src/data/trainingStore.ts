@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from 'react';
 import { requestTraining, reviewTrainingRequest, evaluateTraining, certifyTraining } from './trainingCore';
 import type { TrainingRequest } from './trainingCore';
+import { bangkokYear, employeesForYear, visibleEmployees } from './phase1Core';
+import { getSkillState } from './phase1Store';
 import { DEMO_REVISION, populateTrainingDemo, trainingDemo } from './demoData';
 
 const LEGACY_KEY='daihen.training.role-pages.v1';
@@ -49,8 +51,9 @@ window.addEventListener('storage',event=>{if(event.key===KEY || event.key===LEGA
 export function useTrainingRequests() {return useSyncExternalStore(listener=>{listeners.add(listener);return()=>{listeners.delete(listener);};},()=>records,()=>records);}
 export function trainingStorageError() {return error;}
 export const submitTraining=(form:Parameters<typeof requestTraining>[2])=>update(current=>requestTraining(current,'staff',form));
-export const decideTrainingRequest=(id:string,approve:boolean,date:string,remark:string)=>update(current=>reviewTrainingRequest(current,'chief',id,approve,date,remark));
-export const scoreTraining=(id:string,theory:number,practical:number,note:string)=>update(current=>evaluateTraining(current,'chief',id,theory,practical,note));
+const reportIds=()=>visibleEmployees(employeesForYear(getSkillState(),bangkokYear()),'chief').map(e=>e.id);
+export const decideTrainingRequest=(id:string,approve:boolean,date:string,remark:string)=>update(current=>reviewTrainingRequest(current,'chief',id,approve,date,remark,new Date(),reportIds()));
+export const scoreTraining=(id:string,theory:number,practical:number,note:string)=>update(current=>evaluateTraining(current,'chief',id,theory,practical,note,new Date(),reportIds()));
 export const approveTrainingResult=(id:string,approve:boolean,remark:string)=>update(current=>certifyTraining(current,'manager',id,approve,remark));
 export function resetTrainingDemoState() {
   localStorage.removeItem(KEY);

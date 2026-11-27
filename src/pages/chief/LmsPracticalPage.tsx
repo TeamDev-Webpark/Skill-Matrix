@@ -1,3 +1,4 @@
+import { Can } from '../../components/Permission';
 import { Paged } from '../../components/Paged';
 import { useState } from 'react';
 import { LEVEL_LABELS, SKILL_WIS } from '../../data/phase1Core';
@@ -14,7 +15,7 @@ import { formatThaiDate, LevelChip, Pill } from '../../components/lms/LmsShared'
 const STAGE: Record<Exclude<PracticalStage, 'none'>, { label: string; tone: 'slate' | 'blue' | 'amber' | 'green' | 'red' }> = {
   evaluate: { label: 'รอประเมินหน้างาน', tone: 'amber' }, failed: { label: 'ปฏิบัติยังไม่ผ่าน · ประเมินใหม่ได้', tone: 'red' },
   propose: { label: 'ผ่านปฏิบัติ · รอเสนอปรับระดับ', tone: 'blue' }, 'waiting-manager': { label: 'รอ Manager ยืนยัน', tone: 'slate' },
-  rejected: { label: 'Manager ไม่ยืนยัน · ประเมินใหม่ได้', tone: 'red' }, done: { label: 'ถึงระดับเป้าหมายแล้ว', tone: 'green' },
+  rejected: { label: 'Manager ยังไม่ยืนยันถึงเป้า · ประเมินใหม่ได้', tone: 'red' }, done: { label: 'ถึงระดับเป้าหมายแล้ว', tone: 'green' },
 };
 
 function Card({ item, onResult }: { item: PracticalItem; onResult: (message: string) => void }) {
@@ -39,14 +40,14 @@ function Card({ item, onResult }: { item: PracticalItem; onResult: (message: str
       <p className="text-xs text-blue-800">{c.wiCode} · {wi?.name.replace(/\s*\(.*\)$/, '')} · ประเภท {c.skillType}{type ? ` ${type.label}` : ''}</p>
       <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-600">ระดับปัจจุบัน <LevelChip level={level}/> → เป้าหมาย <LevelChip level={c.skillToLevel}/> {LEVEL_LABELS[c.skillToLevel]}</p></div>
     {e.practical && <div className="rounded-lg border border-slate-200 p-3 text-sm"><p className="font-semibold text-slate-800">ผลประเมินหน้างานล่าสุด: <span className={e.practical.passed ? 'text-emerald-700' : 'text-red-700'}>{e.practical.score}% · {e.practical.passed ? 'ผ่าน' : 'ไม่ผ่าน'}</span></p><p className="text-xs text-slate-500">สังเกตการณ์ {formatThaiDate(e.practical.observedOn)} · {e.practical.evaluatedBy}</p><p className="mt-1 text-slate-600">{e.practical.note}</p></div>}
-    {stage === 'rejected' && adjustment?.remark && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-800">เหตุผลจาก Manager: {adjustment.remark}</p>}
+    {stage === 'rejected' && adjustment && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{adjustment.status === 'approved' ? `Manager อนุมัติเป็นระดับต่ำกว่าเป้าหมาย (Lv ${level})` : 'Manager ไม่อนุมัติ'}{adjustment.remark ? ` · เหตุผล: ${adjustment.remark}` : ''}</p>}
     {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-    {canEvaluate && <form onSubmit={save} className="space-y-3 border-t border-blue-100 pt-4"><p className="text-sm font-semibold text-slate-800">บันทึกผลสังเกตการปฏิบัติงานจริง (ผ่านที่ {PRACTICAL_PASS}%)</p>
+    {canEvaluate && <Can id="queue" action="create"><form onSubmit={save} className="space-y-3 border-t border-blue-100 pt-4"><p className="text-sm font-semibold text-slate-800">บันทึกผลสังเกตการปฏิบัติงานจริง (ผ่านที่ {PRACTICAL_PASS}%)</p>
       <div className="grid gap-3 sm:grid-cols-2"><Field label="คะแนนปฏิบัติ (0–100)"><input type="number" min={0} max={100} className={inputClass} value={score} onChange={x => setScore(x.target.value)}/></Field>
         <Field label="วันที่สังเกตการปฏิบัติ"><input type="date" max={bkkDate()} min={e.passedAt ? bkkDate(new Date(e.passedAt)) : undefined} className={inputClass} value={date} onChange={x => setDate(x.target.value)}/></Field></div>
       <Field label="สิ่งที่สังเกต / หลักฐานอ้างอิง"><textarea rows={2} className={inputClass} value={note} onChange={x => setNote(x.target.value)} placeholder="เช่น ปฏิบัติตาม W/I ครบ ตรวจชิ้นงาน 10 ชิ้นไม่พบข้อผิดพลาด"/></Field>
-      <button className={buttonClass}>บันทึกผลประเมินหน้างาน</button></form>}
-    {stage === 'propose' && <div className="flex flex-wrap items-center gap-3 border-t border-blue-100 pt-4"><button className={buttonClass} onClick={propose}>เสนอปรับระดับสกิลเป็น Lv {c.skillToLevel}</button><span className="text-xs text-slate-500">ส่งเข้าคิว Manager · คะแนนสกิลจะเปลี่ยนเมื่อ Manager ยืนยันเท่านั้น</span></div>}
+      <button className={buttonClass}>บันทึกผลประเมินหน้างาน</button></form></Can>}
+    {stage === 'propose' && <Can id="queue" action="create"><div className="flex flex-wrap items-center gap-3 border-t border-blue-100 pt-4"><button className={buttonClass} onClick={propose}>เสนอปรับระดับสกิลเป็น Lv {c.skillToLevel}</button><span className="text-xs text-slate-500">ส่งเข้าคิว Manager · คะแนนสกิลจะเปลี่ยนเมื่อ Manager ยืนยันเท่านั้น</span></div></Can>}
   </article>;
 }
 
@@ -57,10 +58,10 @@ export default function ChiefLmsPracticalPage() {
   const rest = items.filter(i => !todo.includes(i));
   const count = (s: PracticalStage) => items.filter(i => i.stage === s).length;
   return <div className="space-y-6">
-    <RolePageIntro title="ประเมินหน้างานหลังเรียน" description="สอบออนไลน์วัดความรู้ ส่วนระดับสกิลต้องดูจากการปฏิบัติจริง · ประเมินลูกทีมตรงที่รับรองผลสอบแล้ว จึงเสนอปรับระดับสกิล" steps={['สังเกตการปฏิบัติงานจริงตาม W/I', 'บันทึกคะแนนและหลักฐาน', 'ผ่านแล้วเสนอให้ Manager ยืนยันระดับ']}/>
-    <div className="grid gap-4 md:grid-cols-4"><Metric label="รอประเมินหน้างาน" value={count('evaluate') + count('failed') + count('rejected')}/><Metric label="รอเสนอปรับระดับ" value={count('propose')}/><Metric label="รอ Manager ยืนยัน" value={count('waiting-manager')}/><Metric label="ถึงเป้าหมายแล้ว" value={count('done')}/></div>
+    <Can id="header"><RolePageIntro title="ประเมินหน้างานหลังเรียน" description="สอบออนไลน์วัดความรู้ ส่วนระดับสกิลต้องดูจากการปฏิบัติจริง · ประเมินลูกทีมตรงที่รับรองผลสอบแล้ว จึงเสนอปรับระดับสกิล" steps={['สังเกตการปฏิบัติงานจริงตาม W/I', 'บันทึกคะแนนและหลักฐาน', 'ผ่านแล้วเสนอให้ Manager ยืนยันระดับ']}/></Can>
+    <Can id="metrics"><div className="grid gap-4 md:grid-cols-4"><Metric label="รอประเมินหน้างาน" value={count('evaluate') + count('failed') + count('rejected')}/><Metric label="รอเสนอปรับระดับ" value={count('propose')}/><Metric label="รอ Manager ยืนยัน" value={count('waiting-manager')}/><Metric label="ถึงเป้าหมายแล้ว" value={count('done')}/></div></Can>
     {message && <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">{message}</p>}
-    {todo.length === 0 ? <EmptyState>ไม่มีรายการที่ต้องประเมินหรือเสนอปรับระดับ</EmptyState> : <Paged items={todo} size={6} sizes={[6, 12, 24]} boxed>{({ rows, bar }) => <><div className="grid items-start gap-4 xl:grid-cols-2">{rows.map(i => <Card key={i.e.id} item={i} onResult={setMessage}/>)}</div>{bar}</>}</Paged>}
-    {rest.length > 0 && <section className="space-y-3"><h2 className="font-bold text-slate-800">ดำเนินการแล้ว</h2><Paged items={rest} size={6} sizes={[6, 12, 24]} boxed>{({ rows, bar }) => <><div className="grid items-start gap-4 xl:grid-cols-2">{rows.map(i => <Card key={i.e.id} item={i} onResult={setMessage}/>)}</div>{bar}</>}</Paged></section>}
+    {todo.length === 0 ? <Can id="queue"><EmptyState>ไม่มีรายการที่ต้องประเมินหรือเสนอปรับระดับ</EmptyState></Can> : <Can id="queue"><Paged items={todo} size={6} sizes={[6, 12, 24]} boxed>{({ rows, bar }) => <><div className="grid items-start gap-4 xl:grid-cols-2">{rows.map(i => <Card key={i.e.id} item={i} onResult={setMessage}/>)}</div>{bar}</>}</Paged></Can>}
+    {rest.length > 0 && <Can id="done"><section className="space-y-3"><h2 className="font-bold text-slate-800">ดำเนินการแล้ว</h2><Paged items={rest} size={6} sizes={[6, 12, 24]} boxed>{({ rows, bar }) => <><div className="grid items-start gap-4 xl:grid-cols-2">{rows.map(i => <Card key={i.e.id} item={i} onResult={setMessage}/>)}</div>{bar}</>}</Paged></section></Can>}
   </div>;
 }

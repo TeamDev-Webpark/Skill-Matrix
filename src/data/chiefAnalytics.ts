@@ -1,14 +1,14 @@
 import { ACTORS, bangkokYear, visibleEmployees } from './phase1Core';
 import type { SkillState } from './phase1Core';
 import { managerAnalytics } from './managerAnalytics';
-import { bangkokDate } from './trainingCore';
+import { bangkokDate, chiefRequests } from './trainingCore';
 import type { TrainingRequest } from './trainingCore';
 
 export function chiefAnalytics(state: SkillState, training: TrainingRequest[], now = new Date()) {
   const scopedState = { ...state, snapshots: state.snapshots.map(snapshot => ({ ...snapshot, employees: visibleEmployees(snapshot.employees,'chief') })) };
   const data = managerAnalytics(scopedState, training, { year: bangkokYear(now), department: ACTORS.chief.department, onDuty: true });
   const today = bangkokDate(now);
-  const requests = training.filter(r => r.department === ACTORS.chief.department && data.employees.some(employee=>employee.id===r.employeeId));
+  const requests = chiefRequests(training, data.employees.map(employee => employee.id));
   const people = data.assessment.people.map(person => ({
     id: person.employee.id, name: person.employee.name.replace(/^(นาย|นางสาว|นาง)/, ''),
     needsTraining: person.rows.filter(r => r.level < 2).length,

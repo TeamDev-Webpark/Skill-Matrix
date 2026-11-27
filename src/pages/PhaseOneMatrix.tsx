@@ -1,3 +1,4 @@
+import { Can } from '../components/Permission';
 import { FilterBar, FilterToggle } from '../components/FilterBar';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Grid, User, Users, CheckCircle2, X, Filter, Table, LayoutGrid, ArrowDownWideNarrow } from 'lucide-react';
@@ -184,11 +185,11 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
   ].filter(Boolean) as Array<{ key: string; label: string; onRemove: () => void }>;
 
   return <div className="space-y-5">
-    <div>
+    <Can id="header"><div>
       <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-800">{individual?<User/>:<Grid/>}{title??(individual?'ดูคะแนนรายบุคคล':'ดูคะแนนรายแผนก')}</h1>
       <p className="mt-1 text-sm text-slate-500">ดูระดับสกิลที่ได้รับการยืนยันแล้ว · ปี {currentYear} (เปรียบเทียบผลต่างกับปี {prevYear}) · Level 0–3</p>
-    </div>
-    <FilterBar
+    </div></Can>
+    <Can id="filters"><FilterBar
       title="ตัวกรองคะแนนสกิล"
       onReset={()=>{setDepartment(userRole==='chief'||userRole==='staff'?'QC Section':'ALL');setWi('ALL');setType('ALL');setLevel('ALL');setSearch('');setSelectedId('EMP001');setOnDuty(false);setShowDelta(true);setCardSort('score-desc');resetPage();}}
       footer={
@@ -206,10 +207,10 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
           {[0,1,2,3].map(value=><option key={value} value={value}>Level {value}</option>)}
         </select>
       </Field>
-    </FilterBar>
+    </FilterBar></Can>
 
     {/* Active Filter Badges */}
-    {activeFilters.length > 0 && (
+    <Can id="filters">{activeFilters.length > 0 && (
       <div className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 p-3.5 border border-slate-200">
         <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mr-1">
           <Filter size={13} className="text-blue-700" /> เงื่อนไขที่กำลังกรอง:
@@ -250,11 +251,11 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
           พบพนักงานที่ผ่านเกณฑ์ <strong className="text-blue-700 font-bold">{totalPeople}</strong> คน
         </span>
       </div>
-    )}
+    )}</Can>
 
     {/* View Mode Switcher & Sort (เมื่อดูรายแผนก) */}
     {!individual && (
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+      <Can id="options"><div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-slate-500">รูปแบบการแสดงผล:</span>
@@ -309,10 +310,10 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
             'แสดงตารางระดับทักษะพนักงานเปรียบเทียบทุก W/I'
           )}
         </span>
-      </div>
+      </div></Can>
     )}
 
-    <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+    <Can id="options"><div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
       <span className="font-semibold text-slate-600">ระดับสกิล:</span>
       {LEVEL_LABELS.map((label,value)=><span key={value} className="flex items-center gap-1.5"><LevelBadge level={value}/>{label}</span>)}
       <span className="text-slate-300">|</span>
@@ -335,7 +336,7 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
         <LevelBadge level={2} />
         คะแนนเท่าเดิม (ไม่มีป้าย)
       </span>
-    </div>
+    </div></Can>
 
     {individual && selected && (() => {
       const allEmpKeys = skillKeys(selected, wi, type, onDuty);
@@ -346,7 +347,7 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
       const totalDelta = prevTotal !== null ? curTotal - prevTotal : null;
 
       return (
-        <div className={`${panelClass} flex flex-wrap items-center justify-between gap-4 p-5`}>
+        <Can id="profile"><div className={`${panelClass} flex flex-wrap items-center justify-between gap-4 p-5`}>
           <div className="flex items-center gap-4">
             <Avatar src={selected.avatarUrl} name={selected.name} size="lg" className="ring-2 ring-white shadow-xs"/>
             <div>
@@ -376,12 +377,12 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
             )}
             <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">คะแนนที่ยืนยันแล้ว</span>
           </div>
-        </div>
+        </div></Can>
       );
     })()}
 
-    {!people.length||!keys.length||individual&&!rows.length?<EmptyState>ไม่พบคะแนนตามตัวกรองที่เลือก</EmptyState>:individual&&selected?<div className={`${panelClass} overflow-x-auto`}><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-slate-600"><tr><th className="p-4">W/I</th><th className="p-4">ชื่องาน</th><th className="p-4">ประเภทสกิล</th><th className="p-4 text-center">คะแนนปีก่อน ({prevYear})</th><th className="p-4 text-center">คะแนนปัจจุบัน ({currentYear})</th><th className="p-4 text-center">ผลต่าง (Delta)</th></tr></thead><tbody>{paginatedRows.map(key=>{const item=SKILL_WIS.find(w=>key.startsWith(w.code+'_'))!;const typeCode=key.slice(key.lastIndexOf('_')+1);const currentScore=selected.scores[key]??0;const prevScore=(prevSelected&&prevSelected.scores&&typeof prevSelected.scores[key]==='number')?prevSelected.scores[key]:null;return <tr key={key} data-skill-key={key} className="border-t border-slate-100"><td className="p-4 font-mono font-medium">{item.code}</td><td className="p-4">{item.name}</td><td className="p-4">{typeCode} · {item.types.find(t=>t.code===typeCode)?.label}</td><td className="p-4 text-center">{prevScore!==null?<LevelBadge level={prevScore}/>:<span className="font-mono text-xs text-slate-400">N/A</span>}</td><td className="p-4 text-center"><LevelBadge level={currentScore}/></td><td className="p-4 text-center"><DeltaBadge current={currentScore} prev={prevScore}/></td></tr>;})}</tbody></table><Pagination currentPage={safeCurrentPage} totalItems={rows.length} pageSize={pageSize} onPageChange={setCurrentPage} onPageSizeChange={setPageSize} pageSizeOptions={[5, 10, 25, 50]} itemLabel="สกิล"/></div>:viewMode==='cards'?(
-      <div className="space-y-4">
+    {!people.length||!keys.length||individual&&!rows.length?<Can id="content"><EmptyState>ไม่พบคะแนนตามตัวกรองที่เลือก</EmptyState></Can>:individual&&selected?<Can id="content"><div className={`${panelClass} overflow-x-auto`}><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-slate-600"><tr><th className="p-4">W/I</th><th className="p-4">ชื่องาน</th><th className="p-4">ประเภทสกิล</th><th className="p-4 text-center">คะแนนปีก่อน ({prevYear})</th><th className="p-4 text-center">คะแนนปัจจุบัน ({currentYear})</th><th className="p-4 text-center">ผลต่าง (Delta)</th></tr></thead><tbody>{paginatedRows.map(key=>{const item=SKILL_WIS.find(w=>key.startsWith(w.code+'_'))!;const typeCode=key.slice(key.lastIndexOf('_')+1);const currentScore=selected.scores[key]??0;const prevScore=(prevSelected&&prevSelected.scores&&typeof prevSelected.scores[key]==='number')?prevSelected.scores[key]:null;return <tr key={key} data-skill-key={key} className="border-t border-slate-100"><td className="p-4 font-mono font-medium">{item.code}</td><td className="p-4">{item.name}</td><td className="p-4">{typeCode} · {item.types.find(t=>t.code===typeCode)?.label}</td><td className="p-4 text-center">{prevScore!==null?<LevelBadge level={prevScore}/>:<span className="font-mono text-xs text-slate-400">N/A</span>}</td><td className="p-4 text-center"><LevelBadge level={currentScore}/></td><td className="p-4 text-center"><DeltaBadge current={currentScore} prev={prevScore}/></td></tr>;})}</tbody></table><Pagination currentPage={safeCurrentPage} totalItems={rows.length} pageSize={pageSize} onPageChange={setCurrentPage} onPageSizeChange={setPageSize} pageSizeOptions={[5, 10, 25, 50]} itemLabel="สกิล"/></div></Can>:viewMode==='cards'?(
+      <Can id="content"><div className="space-y-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {paginatedPeople.map(employee => {
             const prevEmp = prevEmployees.find(p => p.id === employee.id);
@@ -484,7 +485,7 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
           pageSizeOptions={[8, 16, 24, 48]}
           itemLabel="คน"
         />
-      </div>
-    ):<div className={`${panelClass} overflow-x-auto`}><table className="w-full whitespace-nowrap text-sm"><thead className="bg-slate-50 text-slate-600"><tr><th className="p-4 text-left">พนักงาน</th>{keys.map(key=><th key={key} className="px-3 py-4 text-center text-xs">{key.slice(0,key.lastIndexOf('_'))}<br/>Type {key.slice(key.lastIndexOf('_')+1)}</th>)}</tr></thead><tbody>{paginatedPeople.map(employee=>{const prevEmp=prevEmployees.find(p=>p.id===employee.id);return <tr key={employee.id} className="border-t border-slate-100"><td className="p-4"><div className="flex items-center gap-3"><Avatar src={employee.avatarUrl} name={employee.name} size="sm"/><div><div className="font-semibold text-slate-800">{employee.name}</div><span className="text-xs text-slate-500">{employee.id} · {employee.department}</span></div></div></td>{keys.map(key=>{const hasSkill=skillKeys(employee,wi,type,onDuty).includes(key);if(!hasSkill)return <td key={key} className="px-3 py-3 text-center text-slate-300">—</td>;const currentScore=employee.scores[key]??0;const prevScore=(prevEmp&&prevEmp.scores&&typeof prevEmp.scores[key]==='number')?prevEmp.scores[key]:null;return <td key={key} className="px-3 py-3 text-center"><ScoreCellWithDelta current={currentScore} prev={prevScore} showDelta={showDelta}/></td>;})}</tr>;})}</tbody></table><Pagination currentPage={safeCurrentPage} totalItems={totalPeople} pageSize={pageSize} onPageChange={setCurrentPage} onPageSizeChange={setPageSize} pageSizeOptions={[5, 10, 25, 50]} itemLabel="คน"/></div>}
+      </div></Can>
+    ):<Can id="content"><div className={`${panelClass} overflow-x-auto`}><table className="w-full whitespace-nowrap text-sm"><thead className="bg-slate-50 text-slate-600"><tr><th className="p-4 text-left">พนักงาน</th>{keys.map(key=><th key={key} className="px-3 py-4 text-center text-xs">{key.slice(0,key.lastIndexOf('_'))}<br/>Type {key.slice(key.lastIndexOf('_')+1)}</th>)}</tr></thead><tbody>{paginatedPeople.map(employee=>{const prevEmp=prevEmployees.find(p=>p.id===employee.id);return <tr key={employee.id} className="border-t border-slate-100"><td className="p-4"><div className="flex items-center gap-3"><Avatar src={employee.avatarUrl} name={employee.name} size="sm"/><div><div className="font-semibold text-slate-800">{employee.name}</div><span className="text-xs text-slate-500">{employee.id} · {employee.department}</span></div></div></td>{keys.map(key=>{const hasSkill=skillKeys(employee,wi,type,onDuty).includes(key);if(!hasSkill)return <td key={key} className="px-3 py-3 text-center text-slate-300">—</td>;const currentScore=employee.scores[key]??0;const prevScore=(prevEmp&&prevEmp.scores&&typeof prevEmp.scores[key]==='number')?prevEmp.scores[key]:null;return <td key={key} className="px-3 py-3 text-center"><ScoreCellWithDelta current={currentScore} prev={prevScore} showDelta={showDelta}/></td>;})}</tr>;})}</tbody></table><Pagination currentPage={safeCurrentPage} totalItems={totalPeople} pageSize={pageSize} onPageChange={setCurrentPage} onPageSizeChange={setPageSize} pageSizeOptions={[5, 10, 25, 50]} itemLabel="คน"/></div></Can>}
   </div>;
 }

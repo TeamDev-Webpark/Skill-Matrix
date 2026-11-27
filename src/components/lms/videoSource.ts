@@ -11,6 +11,8 @@ export function parseVideoSource(raw?: string | null): VideoSource | null {
   if (text.startsWith('idb:')) return { kind: 'file', ref: text };
   const iframe = text.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
   if (iframe) text = iframe[1].trim();
+  // ไฟล์ที่มากับระบบ (พาธเดียวกับเว็บ) เช่น /demo-lms/xxx.webm
+  if (/^\/(?!\/)[^?#]+\.(mp4|webm|ogg|mov|m4v)$/i.test(text)) return { kind: 'direct', url: text };
   let url: URL;
   try { url = new URL(/^https?:\/\//i.test(text) ? text : `https://${text}`); } catch { return null; }
   const host = url.hostname.replace(/^www\./, '').replace(/^m\./, '');

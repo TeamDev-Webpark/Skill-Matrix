@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ArrowDown, ArrowUp, Check, CheckCircle2, ChevronDown, Copy, Plus, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Check, CheckCircle2, ChevronDown, ClipboardPaste, Copy, Plus, Trash2, X } from 'lucide-react';
+import { parseQuestionText } from '../../data/lmsContent';
 import { QUESTION_TYPES, changeQuestionType, emptyQuestion, moveItem, uid } from '../../data/lmsCore';
 import type { Question, QuestionType } from '../../data/lmsCore';
-import { inputClass } from '../Phase1Shared';
+import { buttonClass, inputClass } from '../Phase1Shared';
 import { ImagePicker } from './useMedia';
 
 const iconBtn = 'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-30';
@@ -73,8 +74,37 @@ function QuestionCard({ q, index, count, open, onToggle, onChange, onMove, onDel
   </section>;
 }
 
+const IMPORT_SAMPLE = `พบรอยร้าวที่แนวเชื่อมต้องทำอย่างไร
+a) เจียรแล้วส่งต่อ
+*b) แยกชิ้นงานและออก NC
+c) บันทึกแล้วใช้ต่อ
+อธิบาย: รอยร้าวไม่ยอมรับทุกขนาด
+
+ข้อใดต้องตรวจก่อนเริ่มงาน (เลือกได้หลายข้อ)
+*a) แสงสว่าง
+*b) ความสะอาดของแนวเชื่อม
+c) สีของชิ้นงาน
+คะแนน: 2
+
+ความสว่างขั้นต่ำกี่ลักซ์
+ตอบ: 500 | 500 ลักซ์`;
+
+/** วางข้อความหลายข้อแล้วแปลงเป็นข้อสอบในครั้งเดียว */
+function BulkImport({ onAdd, onClose }: { onAdd: (q: Question[]) => void; onClose: () => void }) {
+  const [text, setText] = useState('');
+  const result = parseQuestionText(text);
+  return <section className="space-y-3 rounded-2xl border border-blue-300 bg-white p-4" aria-label="นำเข้าข้อสอบจากข้อความ">
+    <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-bold text-slate-900">นำเข้าข้อสอบจากข้อความ</h3><button type="button" className="text-xs font-semibold text-blue-700 hover:underline" onClick={() => setText(IMPORT_SAMPLE)}>ใส่ตัวอย่าง</button></div>
+    <p className="text-xs leading-5 text-slate-500">คั่นแต่ละข้อด้วยบรรทัดว่าง · ใส่ * หน้าตัวเลือกที่ถูก (หลายข้อได้) · "ตอบ:" สำหรับคำตอบสั้น · "อธิบาย:" และ "คะแนน:" ใส่หรือไม่ก็ได้</p>
+    <textarea rows={10} aria-label="ข้อความข้อสอบ" className={inputClass} value={text} onChange={e => setText(e.target.value)} placeholder={IMPORT_SAMPLE}/>
+    {result.errors.length > 0 && <ul className="list-disc pl-5 text-xs text-red-700">{result.errors.map(e => <li key={e}>{e}</li>)}</ul>}
+    <div className="flex flex-wrap items-center gap-2"><button type="button" className={buttonClass} disabled={!result.questions.length || result.errors.length > 0} onClick={() => { onAdd(result.questions); onClose(); }}>เพิ่ม {result.questions.length} ข้อ</button><button type="button" className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700" onClick={onClose}>ยกเลิก</button>
+      {result.questions.length > 0 && <span className="text-xs text-slate-500">{result.questions.map(q => QUESTION_TYPES[q.type]).join(' · ')}</span>}</div>
+  </section>;
+}
+
 export default function QuestionBuilder({ questions, passScore, questionsPerExam, onChange }: { questions: Question[]; passScore: number; questionsPerExam: number; onChange: (q: Question[]) => void }) {
-  const [open, setOpen] = useState(questions[0]?.id ?? '');
+  const [open, setOpen] = useState(questions[0]?.id ?? ''); const [importing, setImporting] = useState(false);
   const total = questions.reduce((n, q) => n + (q.points || 0), 0);
   const add = (type: QuestionType) => { const q = emptyQuestion(type); onChange([...questions, q]); setOpen(q.id); };
   const addBtn = 'inline-flex items-center gap-2 rounded-lg border border-dashed border-blue-300 bg-white px-4 py-2 text-sm text-blue-700 hover:bg-blue-50';
@@ -86,6 +116,8 @@ export default function QuestionBuilder({ questions, passScore, questionsPerExam
       onChange={x => onChange(questions.map(k => k.id === q.id ? x : k))} onMove={d => onChange(moveItem(questions, i, d))}
       onDelete={() => { if (window.confirm(`ลบข้อสอบข้อที่ ${i + 1}?`)) onChange(questions.filter(k => k.id !== q.id)); }}
       onCopy={() => { const copy = { ...q, id: uid('Q'), choices: [...q.choices], choiceImages: q.choiceImages ? [...q.choiceImages] : undefined, correct: [...q.correct], accepted: q.accepted ? [...q.accepted] : undefined }; onChange([...questions.slice(0, i + 1), copy, ...questions.slice(i + 1)]); setOpen(copy.id); }}/>)}
-    <div className="flex flex-wrap gap-2" role="group" aria-label="เพิ่มข้อสอบ">{(Object.keys(QUESTION_TYPES) as QuestionType[]).map(t => <button key={t} type="button" className={addBtn} onClick={() => add(t)}><Plus size={15}/>เพิ่ม: {QUESTION_TYPES[t]}</button>)}</div>
+    {importing && <BulkImport onAdd={added => { onChange([...questions, ...added]); setOpen(added[0].id); }} onClose={() => setImporting(false)}/>}
+    <div className="flex flex-wrap gap-2" role="group" aria-label="เพิ่มข้อสอบ">
+      <button type="button" className={`${addBtn} border-solid font-semibold`} onClick={() => setImporting(true)}><ClipboardPaste size={15}/>นำเข้าหลายข้อจากข้อความ</button>{(Object.keys(QUESTION_TYPES) as QuestionType[]).map(t => <button key={t} type="button" className={addBtn} onClick={() => add(t)}><Plus size={15}/>เพิ่ม: {QUESTION_TYPES[t]}</button>)}</div>
   </div>;
 }

@@ -1,3 +1,4 @@
+import { Can } from '../Permission';
 import { Paged } from '../Paged';
 import { Fragment, useState } from 'react';
 import { History, LockOpen, UserX } from 'lucide-react';
@@ -40,8 +41,8 @@ export default function LearnerTable({ rows, courses, showDepartment = false, re
             <td className="px-3 py-3 text-center text-xs tabular-nums text-slate-700">{attemptsUsed(e)}/{c.maxAttempts}</td>
             <td className="py-3 pl-3 pr-4"><div className={`grid items-center gap-2 ${onRemove ? 'grid-cols-2' : 'grid-cols-1'}`}>
               <button type="button" className={`${action} ${open === 'history' ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`} aria-expanded={open === 'history'} aria-label={`ประวัติของ ${e.employeeName}`} title="ประวัติ" onClick={() => toggle(e.id, 'history')}><History size={14} className="shrink-0"/>ประวัติ</button>
-              {onRemove && <button type="button" disabled={e.status === 'certified'} className={`${action} border-red-200 bg-white text-red-700 hover:bg-red-50`} aria-label={`ยกเลิกการลงทะเบียนของ ${e.employeeName}`} title={e.status === 'certified' ? 'รับรองผลแล้ว ไม่สามารถยกเลิกการลงทะเบียนได้' : 'ยกเลิกการลงทะเบียน'} onClick={() => onRemove(e)}><UserX size={14} className="shrink-0"/>ยกเลิก</button>}
-              {e.status === 'locked' && <button type="button" className={`${action} col-span-full border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100`} aria-expanded={open === 'unlock'} onClick={() => toggle(e.id, 'unlock')}><LockOpen size={14} className="shrink-0"/>ปลดล็อกสิทธิ์สอบ</button>}
+              {onRemove && <Can id="learners" action="delete"><button type="button" disabled={e.status === 'certified'} className={`${action} border-red-200 bg-white text-red-700 hover:bg-red-50`} aria-label={`ยกเลิกการลงทะเบียนของ ${e.employeeName}`} title={e.status === 'certified' ? 'รับรองผลแล้ว ไม่สามารถยกเลิกการลงทะเบียนได้' : 'ยกเลิกการลงทะเบียน'} onClick={() => onRemove(e)}><UserX size={14} className="shrink-0"/>ยกเลิก</button></Can>}
+              {e.status === 'locked' && <Can id="learners" action="edit"><button type="button" className={`${action} col-span-full border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100`} aria-expanded={open === 'unlock'} onClick={() => toggle(e.id, 'unlock')}><LockOpen size={14} className="shrink-0"/>ปลดล็อกสิทธิ์สอบ</button></Can>}
             </div></td>
           </tr>
           {open && <tr className="bg-blue-50/50"><td colSpan={7} className="px-4 pb-4 pt-0">

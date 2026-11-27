@@ -1,3 +1,4 @@
+import { Can } from '../../components/Permission';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { ArrowRight, Download } from 'lucide-react';
@@ -103,53 +104,53 @@ export default function ManagerLmsDashboard({ onNavigate }: { onNavigate: (page:
 
   return <div className="space-y-5">
     <div className="flex flex-wrap items-end justify-between gap-4">
-      <div><h1 className="text-2xl font-bold text-slate-900">ภาพรวมการเรียนออนไลน์</h1><p className="mt-1 text-sm text-slate-500">ข้อมูล ณ {formatThaiDate(data.today)} · ความครบถ้วนของการอบรม ผลการเรียน และการยกระดับสกิล</p></div>
-      <div className="flex flex-wrap items-end gap-3">
+      <Can id="header"><div><h1 className="text-2xl font-bold text-slate-900">ภาพรวมการเรียนออนไลน์</h1><p className="mt-1 text-sm text-slate-500">ข้อมูล ณ {formatThaiDate(data.today)} · ความครบถ้วนของการอบรม ผลการเรียน และการยกระดับสกิล</p></div></Can>
+      <Can id="filters"><div className="flex flex-wrap items-end gap-3">
         <div className="w-48"><Field label="แผนก"><select className={inputClass} value={department} onChange={e => setDepartment(e.target.value)}><option value="ALL">ทุกแผนก</option>{SKILL_DEPARTMENTS.map(d => <option key={d}>{d}</option>)}</select></Field></div>
         <div className="w-48"><Field label="หมวดหลักสูตร"><select className={inputClass} value={category} onChange={e => setCategory(e.target.value)}><option value="ALL">ทุกหมวด</option>{COURSE_CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></Field></div>
         <button type="button" onClick={exportSummary} className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700"><Download size={16}/>ส่งออกสรุป</button>
-      </div>
+      </div></Can>
     </div>
 
-    <Headline data={data}/>
+    <Can id="headline"><Headline data={data}/></Can>
 
     <div className="grid gap-5 xl:grid-cols-12">
-      <Panel className="xl:col-span-7" title="อบรมบังคับรายแผนก" note={`เรียงจากแผนกที่ต้องเร่งก่อน · เส้นสีเข้มคือเป้าหมาย ${COMPLIANCE_TARGET}%`}>
+      <Can id="departments"><Panel className="xl:col-span-7" title="อบรมบังคับรายแผนก" note={`เรียงจากแผนกที่ต้องเร่งก่อน · เส้นสีเข้มคือเป้าหมาย ${COMPLIANCE_TARGET}%`}>
         {!data.mandatory.length ? <p className="text-sm text-slate-500">ไม่มีหลักสูตรบังคับในหมวดที่เลือก</p> : <ul className="space-y-4">{data.departments.map(d => <li key={d.department}>
           <button type="button" className="w-full rounded-lg p-1 text-left hover:bg-slate-50" aria-label={`กรองเฉพาะแผนก ${d.department}`} onClick={() => setDepartment(d.department)}>
             <span className="flex items-baseline justify-between gap-3 text-sm"><span className="font-semibold text-slate-800">{d.department}</span><span className="tabular-nums"><strong className="text-slate-900">{pct(d.compliance)}</strong><span className="ml-2 text-xs text-slate-500">ขาด {d.missing} จาก {d.headcount} คน · เลยกำหนด {d.overdue}</span></span></span>
             <span className="relative mt-1.5 block h-3 rounded bg-blue-50"><span className="block h-full rounded bg-blue-600" style={{ width: `${d.compliance ?? 0}%` }}/><span className="absolute -top-0.5 h-4 w-0.5 bg-slate-700" style={{ left: `${COMPLIANCE_TARGET}%` }}/></span>
           </button></li>)}</ul>}
-      </Panel>
-      <Panel className="xl:col-span-5" title="สถานะการเรียนตอนนี้" note={`${total} การลงทะเบียน`}>
+      </Panel></Can>
+      <Can id="status"><Panel className="xl:col-span-5" title="สถานะการเรียนตอนนี้" note={`${total} การลงทะเบียน`}>
         {!total ? <p className="text-sm text-slate-500">ยังไม่มีการลงทะเบียน</p> : <>
           <div className="flex h-4 gap-0.5 overflow-hidden rounded" role="img" aria-label={data.statusMix.map(s => `${s.label} ${s.count}`).join(' ')}>{data.statusMix.filter(s => s.count).map(s => <div key={s.key} title={`${s.label} ${s.count}`} className={STATUS_COLOR[s.key]} style={{ width: `${s.count / total * 100}%` }}/>)}</div>
           <ul className="mt-4 divide-y divide-slate-100">{data.statusMix.map(s => <li key={s.key} className="flex items-center justify-between py-2.5 text-sm"><span className="flex items-center gap-2 text-slate-700"><span className={`h-2.5 w-2.5 rounded-sm ${STATUS_COLOR[s.key]}`}/>{s.label}</span><span className="tabular-nums"><strong className="text-slate-900">{s.count}</strong><span className="ml-2 inline-block w-10 text-right text-xs text-slate-500">{Math.round(s.count / total * 100)}%</span></span></li>)}</ul></>}
-      </Panel>
+      </Panel></Can>
     </div>
 
-    <FollowUp data={data} scopeKey={scopeKey} onNavigate={onNavigate} avatar={id => people.find(p => p.id === id)?.avatarUrl}/>
+    <Can id="followup"><FollowUp data={data} scopeKey={scopeKey} onNavigate={onNavigate} avatar={id => people.find(p => p.id === id)?.avatarUrl}/></Can>
 
     <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-12">
-      <Panel className="lg:col-span-2 2xl:col-span-6" title="แนวโน้ม 6 เดือน" note="จำนวนที่ลงทะเบียนใหม่ เทียบกับที่ได้รับรองผลในเดือนนั้น">
+      <Can id="trend"><Panel className="lg:col-span-2 2xl:col-span-6" title="แนวโน้ม 6 เดือน" note="จำนวนที่ลงทะเบียนใหม่ เทียบกับที่ได้รับรองผลในเดือนนั้น">
         <div className="h-64" role="img" aria-label={`แนวโน้มรายเดือน ${data.trend.map(t => `${t.month} ลงทะเบียน ${t.enrolled} รับรอง ${t.certified}`).join(', ')}`}><ResponsiveContainer width="100%" height="100%"><BarChart data={data.trend} barGap={2} margin={{ top: 18, right: 4, left: -18, bottom: 0 }}><CartesianGrid vertical={false} stroke="#e2e8f0"/><XAxis dataKey="month" tick={{ fontSize: 12, fill: '#64748b' }} tickLine={false} axisLine={false}/><YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#64748b' }} tickLine={false} axisLine={false}/><Tooltip cursor={{ fill: '#f1f5f9' }}/><Legend wrapperStyle={{ fontSize: 12 }}/>
           <Bar dataKey="enrolled" name="ลงทะเบียนใหม่" fill="#2a78d6" radius={[4, 4, 0, 0]} maxBarSize={26} isAnimationActive={false}><LabelList dataKey="enrolled" position="top" fontSize={11} fill="#475569"/></Bar>
           <Bar dataKey="certified" name="ได้รับรองผล" fill="#1baf7a" radius={[4, 4, 0, 0]} maxBarSize={26} isAnimationActive={false}><LabelList dataKey="certified" position="top" fontSize={11} fill="#475569"/></Bar></BarChart></ResponsiveContainer></div>
-      </Panel>
-      <Panel className="2xl:col-span-3" title="เรียนค้างอยู่ขั้นไหน" note="จากลงทะเบียนถึงหัวหน้ารับรอง"><Steps items={data.funnel}/></Panel>
-      <Panel className="2xl:col-span-3" title="ผลเรียนกลายเป็นสกิลหรือยัง" note="เฉพาะหลักสูตรที่ผูกกับระดับสกิล"><Steps items={data.transfer}/></Panel>
+      </Panel></Can>
+      <Can id="funnel"><Panel className="2xl:col-span-3" title="เรียนค้างอยู่ขั้นไหน" note="จากลงทะเบียนถึงหัวหน้ารับรอง"><Steps items={data.funnel}/></Panel></Can>
+      <Can id="funnel"><Panel className="2xl:col-span-3" title="ผลเรียนกลายเป็นสกิลหรือยัง" note="เฉพาะหลักสูตรที่ผูกกับระดับสกิล"><Steps items={data.transfer}/></Panel></Can>
     </div>
 
-    <Panel title="ประสิทธิผลรายหลักสูตร" note="หลักสูตรที่ควรทบทวนเรียงขึ้นก่อน · ผ่านครั้งแรกต่ำกว่า 65% (จากผู้สอบ 5 คนขึ้นไป) ควรทบทวนเนื้อหาหรือข้อสอบ">
+    <Can id="courses"><Panel title="ประสิทธิผลรายหลักสูตร" note="หลักสูตรที่ควรทบทวนเรียงขึ้นก่อน · ผ่านครั้งแรกต่ำกว่า 65% (จากผู้สอบ 5 คนขึ้นไป) ควรทบทวนเนื้อหาหรือข้อสอบ">
       <Paged items={data.courseRows} unit="หลักสูตร" resetKey={scopeKey}>{({ rows, bar }) => <div className="overflow-hidden rounded-lg border border-slate-200"><div className="overflow-x-auto"><table className="w-full min-w-[52rem] text-sm"><thead className="bg-slate-50"><tr><th className={th}>หลักสูตร</th><th className={`${th} text-right`}>ผู้เรียน</th><th className={`${th} text-right`}>ได้รับรอง</th><th className={`${th} text-right`}>ผ่านครั้งแรก</th><th className={`${th} text-right`}>คะแนนเฉลี่ย</th><th className={`${th} text-right`}>เลยกำหนด</th><th className={`${th} text-right`}>ติดล็อก</th><th className={th}>ข้อสังเกต</th></tr></thead>
         <tbody>{rows.map(r => <tr key={r.course.id} className="border-t border-slate-100 tabular-nums"><td className={td}><p className="font-semibold text-slate-800">{r.course.title}</p><p className="text-xs text-slate-500">{r.course.code} · {r.course.category}{r.course.mandatory ? ' · หลักสูตรบังคับ' : ''}</p></td><td className={`${td} text-right`}>{r.enrolled}</td><td className={`${td} text-right`}>{pct(r.completion)}</td><td className={`${td} text-right`}>{pct(r.firstPass)}</td><td className={`${td} text-right`}>{r.average ?? 'ไม่มีข้อมูล'}</td><td className={`${td} text-right`}>{r.overdue}</td><td className={`${td} text-right`}>{r.locked}</td><td className={`${td} whitespace-nowrap`}><Pill tone={r.signal.tone}>{r.signal.label}</Pill></td></tr>)}</tbody></table></div>{bar}</div>}</Paged>
-    </Panel>
+    </Panel></Can>
 
-    <Panel title="ช่องว่างสกิลเทียบกับหลักสูตรที่มี" note={`คนที่ยังทำงานเองไม่ได้ (ต่ำกว่าระดับ 2) เรียงจากมากไปน้อย · ${data.gapsWithoutCourse} จาก ${data.gaps.length} สกิลยังไม่มีหลักสูตรรองรับ · ไม่ขึ้นกับตัวกรองหมวดหลักสูตร`}
+    <Can id="gaps"><Panel title="ช่องว่างสกิลเทียบกับหลักสูตรที่มี" note={`คนที่ยังทำงานเองไม่ได้ (ต่ำกว่าระดับ 2) เรียงจากมากไปน้อย · ${data.gapsWithoutCourse} จาก ${data.gaps.length} สกิลยังไม่มีหลักสูตรรองรับ · ไม่ขึ้นกับตัวกรองหมวดหลักสูตร`}
       action={<label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={onlyUncovered} onChange={e => setOnlyUncovered(e.target.checked)}/>เฉพาะที่ยังไม่มีหลักสูตร</label>}>
       {!gaps.length ? <p className="rounded-lg bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่มีช่องว่างสกิลตามเงื่อนไขที่เลือก</p> :
         <Paged items={gaps} unit="สกิล" resetKey={`${department}|${onlyUncovered}`}>{({ rows, bar }) => <div className="overflow-hidden rounded-lg border border-slate-200"><div className="overflow-x-auto"><table className="w-full min-w-[52rem] text-sm"><thead className="bg-slate-50"><tr><th className={th}>สกิล (W/I · ประเภท)</th><th className={th}>แผนก</th><th className={`${th} w-64`}>ยังทำเองไม่ได้</th><th className={th}>หลักสูตรรองรับ</th></tr></thead>
           <tbody>{rows.map(g => <tr key={g.key} className="border-t border-slate-100"><td className={td}><p className="font-semibold text-slate-800">{g.wiCode} · {g.type} {g.typeLabel}</p><p className="max-w-sm truncate text-xs text-slate-500" title={g.wiName}>{g.wiName}</p></td><td className={`${td} text-slate-600`}>{g.department}</td><td className={td}><div className="flex items-center gap-3"><div className="h-2 flex-1 rounded bg-blue-50"><div className="h-full rounded bg-blue-600" style={{ width: `${g.share}%` }}/></div><span className="w-28 text-right text-xs tabular-nums text-slate-600"><strong className="text-sm text-slate-900">{g.below}</strong> / {g.people} คน</span></div></td><td className={td}>{g.course ? <><p className="text-slate-700">{g.course.title}</p><p className="text-xs text-slate-500">ลงเรียนแล้ว {g.enrolled} จาก {g.below} คน</p></> : <Pill tone="amber">ยังไม่มีหลักสูตร</Pill>}</td></tr>)}</tbody></table></div>{bar}</div>}</Paged>}
-    </Panel>
+    </Panel></Can>
   </div>;
 }

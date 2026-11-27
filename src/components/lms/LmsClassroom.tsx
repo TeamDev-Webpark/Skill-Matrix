@@ -3,6 +3,8 @@ import { ArrowLeft, ArrowRight, Award, Check, CheckCircle2, ClipboardCheck, Cloc
 import { allLessonsDone, attemptsUsed, buildExam, gradeQuestion, isAnswered, lessonUnlocked, lessonsDone, progressPercent } from '../../data/lmsCore';
 import type { Answer, Attempt, Course, Enrollment, Lesson, PracticalStage, Question } from '../../data/lmsCore';
 import { MediaImage } from './useMedia';
+import RichText from './RichText';
+import { AttachmentViewer } from './Attachments';
 import { buttonClass } from '../Phase1Shared';
 import LmsCertificate from './LmsCertificate';
 import { EnrollmentBadge, EventTimeline, SkillGoal } from './LmsShared';
@@ -19,35 +21,26 @@ const card = 'rounded-2xl border border-slate-200 bg-white shadow-sm';
 const ghostBtn = 'inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40';
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ'];
 
-/* เนื้อหา: ย่อหน้าอ่านสบาย, รายการ "หัวข้อ: รายละเอียด" แสดงเป็นการ์ดประเด็นสำคัญ */
-function Body({ text }: { text: string }) {
-  const blocks: ({ bullets: string[] } | { p: string })[] = [];
-  for (const line of text.split('\n').map(l => l.trim()).filter(Boolean)) {
-    if (line.startsWith('- ')) { const last = blocks[blocks.length - 1]; if (last && 'bullets' in last) last.bullets.push(line.slice(2)); else blocks.push({ bullets: [line.slice(2)] }); }
-    else blocks.push({ p: line });
-  }
-  return <div className="max-w-[70ch] space-y-5 text-[15px] leading-8 text-slate-700">{blocks.map((b, i) => 'p' in b
-    ? <p key={i}>{b.p}</p>
-    : <ul key={i} className="space-y-2 rounded-xl border border-blue-100 bg-blue-50/50 p-4">{b.bullets.map((x, k) => { const at = x.indexOf(':'); const label = at > 0 && at < 40 ? x.slice(0, at) : ''; return <li key={k} className="flex gap-3 leading-7"><span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600"/><span>{label ? <><strong className="font-semibold text-slate-900">{label}</strong>{x.slice(at)}</> : x}</span></li>; })}</ul>)}</div>;
-}
-
-function LessonFooter({ hasPrev, isLast, done, remaining, total, onPrev, onComplete, onNext, showComplete }: { hasPrev: boolean; isLast: boolean; done: boolean; remaining: number; total: number; onPrev: () => void; onComplete?: () => void; onNext: () => void; showComplete: boolean }) {
+function LessonFooter({ hasPrev, isLast, done, remaining, total, onPrev, onComplete, onNext, showComplete, blocked = false }: { blocked?: boolean; hasPrev: boolean; isLast: boolean; done: boolean; remaining: number; total: number; onPrev: () => void; onComplete?: () => void; onNext: () => void; showComplete: boolean }) {
   const pct = total > 0 ? Math.min(100, Math.round(((total - remaining) / total) * 100)) : 100;
   return <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-5">
     <button className={ghostBtn} disabled={!hasPrev} onClick={onPrev}><ArrowLeft size={16}/>บทก่อนหน้า</button>
     <div className="flex items-center gap-4">
       {showComplete && !done && remaining > 0 && <div className="flex items-center gap-2 text-xs text-slate-500" role="status"><Clock size={14}/>อ่านต่ออีก {remaining} วินาที<span className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-200"><span className="block h-full rounded-full bg-blue-600 transition-all" style={{ width: `${pct}%` }}/></span></div>}
-      {showComplete && !done && <button className={buttonClass} disabled={remaining > 0} onClick={onComplete}><Check size={16}/>อ่านจบแล้ว · {isLast ? 'ไปทำแบบทดสอบ' : 'ไปบทถัดไป'}</button>}
+      {showComplete && !done && <button className={buttonClass} disabled={remaining > 0 || blocked} onClick={onComplete}><Check size={16}/>อ่านจบแล้ว · {isLast ? 'ไปทำแบบทดสอบ' : 'ไปบทถัดไป'}</button>}
       {done && <button className={buttonClass} onClick={onNext}>{isLast ? 'ไปทำแบบทดสอบ' : 'บทถัดไป'}<ArrowRight size={16}/></button>}
     </div></div>;
 }
 
 function ArticleLesson({ lesson, done, hasPrev, isLast, onPrev, onComplete, onNext }: { lesson: Lesson; done: boolean; hasPrev: boolean; isLast: boolean; onPrev: () => void; onComplete: () => void; onNext: () => void }) {
-  const [seconds, setSeconds] = useState(0);
+  const [seconds, setSeconds] = useState(0); const [opened, setOpened] = useState<string[]>([]);
   useEffect(() => { const t = window.setInterval(() => setSeconds(s => s + 1), 1000); return () => window.clearInterval(t); }, []);
-  return <><Body text={lesson.body}/><LessonFooter hasPrev={hasPrev} isLast={isLast} done={done} remaining={Math.max(0, lesson.minSeconds - seconds)} total={lesson.minSeconds} onPrev={onPrev} onComplete={onComplete} onNext={onNext} showComplete/></>;
+  const unread = lesson.requireOpen && !done ? (lesson.attachments ?? []).filter(a => a.kind === 'pdf' && !opened.includes(a.id)).length : 0;
+  return <>{lesson.body.trim() && <RichText text={lesson.body}/>}
+    {!!lesson.attachments?.length && <AttachmentViewer files={lesson.attachments} opened={opened} onOpened={id => setOpened(list => list.includes(id) ? list : [...list, id])}/>}
+    {unread > 0 && <p role="status" className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">ต้องเปิดอ่านเอกสาร PDF ให้ครบก่อน เหลืออีก {unread} ไฟล์</p>}
+    <LessonFooter hasPrev={hasPrev} isLast={isLast} done={done} remaining={Math.max(0, lesson.minSeconds - seconds)} total={lesson.minSeconds} blocked={unread > 0} onPrev={onPrev} onComplete={onComplete} onNext={onNext} showComplete/></>;
 }
-
 
 const hasChoiceAt = (q: Question, i: number) => !!(q.choices[i]?.trim() || q.choiceImages?.[i]);
 function ChoiceBody({ q, i }: { q: Question; i: number }) {
@@ -168,7 +161,7 @@ export default function LmsClassroom({ course, enrollment, onBack, onLessonDone,
           {cur.objectives.length > 0 && <section className="mb-7 mt-5 rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5" aria-label="วัตถุประสงค์"><h3 className="mb-2 text-sm font-bold text-blue-900">เมื่อจบบทนี้ คุณจะสามารถ</h3><ul className="space-y-1.5">{cur.objectives.map((o, i) => <li key={i} className="flex gap-2.5 text-sm leading-6 text-slate-700"><CheckCircle2 size={17} className="mt-0.5 shrink-0 text-blue-600"/>{o}</li>)}</ul></section>}
           {!cur.objectives.length && <div className="mb-6"/>}
           {cur.type === 'video'
-            ? <div className="space-y-6"><VideoPlayer key={cur.id} lesson={cur} done={!!enrollment.lessonDone[cur.id]} progressKey={preview ? undefined : `${enrollment.id}:${cur.id}`} onComplete={info => doneLesson(view.index, info)}/>{cur.body.trim() && <Body text={cur.body}/>}
+            ? <div className="space-y-6"><VideoPlayer key={cur.id} lesson={cur} done={!!enrollment.lessonDone[cur.id]} progressKey={preview ? undefined : `${enrollment.id}:${enrollment.attemptsResetAt ? `r${enrollment.attemptsResetAt}:` : ''}${cur.id}`} onComplete={info => doneLesson(view.index, info)}/>{cur.body.trim() && <RichText text={cur.body}/>}{!!cur.attachments?.length && <AttachmentViewer files={cur.attachments} opened={[]} onOpened={() => {}}/>}
                 <LessonFooter hasPrev={view.index > 0} isLast={view.index === course.lessons.length - 1} done={!!enrollment.lessonDone[cur.id]} remaining={0} total={0} showComplete={false} onPrev={() => go(view.index - 1)} onNext={() => go(view.index + 1)}/></div>
             : <ArticleLesson key={cur.id} lesson={cur} done={!!enrollment.lessonDone[cur.id]} hasPrev={view.index > 0} isLast={view.index === course.lessons.length - 1} onPrev={() => go(view.index - 1)} onComplete={() => doneLesson(view.index)} onNext={() => go(view.index + 1)}/>}
         </article>}

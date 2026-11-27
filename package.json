@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node --test scripts/phase1-core.test.cjs scripts/role-pages.test.cjs scripts/manager-analytics.test.cjs scripts/demo-data.test.cjs scripts/assessment-pdf.test.cjs scripts/lms-core.test.cjs",
+    "test": "node --test scripts/phase1-core.test.cjs scripts/role-pages.test.cjs scripts/manager-analytics.test.cjs scripts/demo-data.test.cjs scripts/assessment-pdf.test.cjs scripts/lms-core.test.cjs scripts/handoff.test.cjs scripts/permissions.test.cjs",
     "test:ui": "npm run build && node scripts/role-pages-ui.test.mjs"
   },
   "dependencies": {

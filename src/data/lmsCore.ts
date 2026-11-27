@@ -3,7 +3,10 @@ import type { Role } from './phase1Core';
 /* ---------- ชนิดข้อมูล ---------- */
 export type LessonType = 'video' | 'article';
 export interface Checkpoint { id: string; timeSec: number; question: string; choices: string[]; answerIndex: number; explanation?: string }
+/** ไฟล์แนบบทเรียน: ref = 'idb:…' (อัปโหลด) หรือลิงก์/พาธของไฟล์ */
+export interface Attachment { id: string; kind: 'pdf' | 'image'; name: string; ref: string; size?: number }
 export interface Lesson {
+  attachments?: Attachment[]; requireOpen?: boolean;   // requireOpen: บทความต้องเปิดอ่าน PDF ครบก่อนกดจบ
   id: string; title: string; type: LessonType; durationMin: number;
   objectives: string[]; body: string;            // body: ข้อความ ขึ้นบรรทัดใหม่ = ย่อหน้า, "- " นำหน้า = bullet
   videoUrl?: string; videoName?: string;           // videoUrl: ลิงก์ หรือ 'idb:…' = ไฟล์ที่อัปโหลดในเบราว์เซอร์
@@ -224,8 +227,9 @@ export function submitExam(s: LmsState, enrollmentId: string, answers: Record<st
 /* ---------- Chief รับรองผล / ปลดล็อก ---------- */
 export function nextCertificateNo(s: LmsState, now = new Date()) {
   const year = bkkDate(now).slice(0, 4);
-  const n = s.enrollments.filter(e => e.certificateNo?.startsWith(`CERT-${year}-`)).length + 1;
-  return `CERT-${year}-${String(n).padStart(4, '0')}`;
+  // ต่อจากเลขสูงสุด (ไม่ใช้การนับจำนวน) เลขจึงไม่ซ้ำแม้ลำดับเดิมมีช่องว่าง
+  const last = Math.max(0, ...s.enrollments.filter(e => e.certificateNo?.startsWith(`CERT-${year}-`)).map(e => Number(e.certificateNo!.slice(10)) || 0));
+  return `CERT-${year}-${String(last + 1).padStart(4, '0')}`;
 }
 export function certifyResult(s: LmsState, role: Role, chief: { name: string; reportIds: string[] }, enrollmentId: string, approve: boolean, remark: string, now = new Date()): LmsState {
   if (role !== 'chief') throw new Error('เฉพาะหัวหน้างานที่รับรองผลการเรียนได้');
@@ -270,7 +274,8 @@ export type PracticalStage = 'none' | 'evaluate' | 'failed' | 'propose' | 'waiti
 export function practicalStage(c: Course, e: Enrollment, currentLevel: number, adjustment?: 'pending' | 'approved' | 'rejected'): PracticalStage {
   if (e.status !== 'certified' || !c.skillToLevel || !skillKey(c)) return 'none';
   if (e.proposal && adjustment === 'pending') return 'waiting-manager';
-  if (e.proposal && adjustment === 'approved') return 'done';
+  // Manager อนุมัติแต่ปรับเป็นระดับต่ำกว่าเป้า = ยังไม่ถึงเป้า ให้ประเมินและเสนอใหม่ได้
+  if (e.proposal && adjustment === 'approved') return currentLevel >= c.skillToLevel ? 'done' : 'rejected';
   if (e.proposal && adjustment === 'rejected') return 'rejected';
   if (currentLevel >= c.skillToLevel) return 'done';
   if (isExpired(e)) return 'none';
@@ -310,7 +315,8 @@ export function validateCourse(c: Course, all: Course[], forPublish = false): st
   c.lessons.forEach((l, i) => {
     if (!l.title.trim()) errors.push(`บทเรียนที่ ${i + 1}: ระบุชื่อ`);
     if (l.type === 'video' && forPublish && !l.videoUrl?.trim()) errors.push(`บทเรียนที่ ${i + 1}: ใส่ลิงก์วิดีโอ`);
-    if (l.type === 'article' && forPublish && !l.body.trim()) errors.push(`บทเรียนที่ ${i + 1}: ใส่เนื้อหา`);
+    if (l.type === 'article' && forPublish && !l.body.trim() && !l.attachments?.length) errors.push(`บทเรียนที่ ${i + 1}: ใส่เนื้อหาหรือแนบไฟล์`);
+    if (l.attachments?.some(a => !a.name.trim())) errors.push(`บทเรียนที่ ${i + 1}: ตั้งชื่อไฟล์แนบให้ครบ`);
     l.checkpoints.forEach((cp, k) => { if (!cp.question.trim() || cp.choices.filter(x => x.trim()).length < 2 || cp.answerIndex < 0 || cp.answerIndex >= cp.choices.length || !cp.choices[cp.answerIndex]?.trim()) errors.push(`บทเรียนที่ ${i + 1} จุดถามที่ ${k + 1}: คำถามต้องมีอย่างน้อย 2 ตัวเลือกและระบุคำตอบที่ถูก`); });
   });
   c.questions.map(normalizeQuestion).forEach((q, i) => {

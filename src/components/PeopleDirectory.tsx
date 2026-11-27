@@ -1,3 +1,4 @@
+import { Can } from './Permission';
 import { FilterBar } from './FilterBar';
 import { useState } from 'react';
 import { Field, inputClass, panelClass } from './Phase1Shared';
@@ -25,15 +26,15 @@ export default function PeopleDirectory({employees}:{employees:Employee[]}) {
   }
 
   return <div className="space-y-4">
-    <div className="flex items-center justify-between">
+    <Can id="filters"><div className="flex items-center justify-between">
       <FilterBar title="ค้นหาบุคลากร" onReset={()=>{setSearch('');setCurrentPage(1);}}>
         <Field label="ค้นหาบุคลากร"><input className={inputClass} value={search} onChange={e=>handleSearchChange(e.target.value)} placeholder="รหัส ชื่อ แผนก หรือตำแหน่ง"/></Field>
       </FilterBar>
-    </div>
-    <div className="flex items-center justify-between px-1 text-xs text-slate-500">
+    </div></Can>
+    <Can id="table"><div className="flex items-center justify-between px-1 text-xs text-slate-500">
       <span>{search.trim() ? `ผลการค้นหา: ` : `บุคลากรทั้งหมด: `}<strong className="font-semibold text-slate-800">{totalPeople}</strong> คน{search.trim() ? ` (จาก ${employees.length} คน)` : ''}</span>
-    </div>
-    <div className={`${panelClass} overflow-x-auto`}>
+    </div></Can>
+    <Can id="table"><div className={`${panelClass} overflow-x-auto`}>
       <table className="w-full text-left text-sm">
         <thead className="bg-slate-50">
           <tr><th className="p-4">พนักงาน</th><th className="p-4">แผนก</th><th className="p-4">ตำแหน่ง</th><th className="p-4 text-right">คะแนนรวม</th></tr>
@@ -64,6 +65,6 @@ export default function PeopleDirectory({employees}:{employees:Employee[]}) {
         pageSizeOptions={[5, 10, 25, 50]}
         itemLabel="คน"
       />
-    </div>
+    </div></Can>
   </div>;
 }

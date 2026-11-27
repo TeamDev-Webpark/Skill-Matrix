@@ -1,3 +1,4 @@
+import { Can } from '../components/Permission';
 import { Paged } from '../components/Paged';
 import { FilterBar } from '../components/FilterBar';
 import { useState, useRef } from 'react';
@@ -123,25 +124,25 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+        <Can id="header"><div className="flex items-center gap-3">
           <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-800">
             <Users />จัดการข้อมูลพนักงาน
           </h1>
           <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-800">
             {search.trim() ? `ค้นพบ ${totalEmployees} จาก ${allVisibleEmployees.length} คน` : `ทั้งหมด ${totalEmployees} คน`}
           </span>
-        </div>
+        </div></Can>
         {userRole === 'admin' && (
-          <div className="flex items-center gap-2">
-            <button
+          <Can id="actions"><div className="flex items-center gap-2">
+            <Can id="actions" action="create"><button
               type="button"
               className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-sm font-semibold text-emerald-800 shadow-2xs hover:bg-emerald-100 transition-colors"
               onClick={() => setShowImportModal(true)}
             >
               <FileSpreadsheet size={16} className="text-emerald-600" />
               <span>นำเข้าจาก Excel</span>
-            </button>
-            <button
+            </button></Can>
+            <Can id="actions" action="create"><button
               className={buttonClass}
               onClick={() => {
                 setForm({ ...blank });
@@ -150,14 +151,14 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
               }}
             >
               <Plus size={16} />เพิ่มพนักงาน
-            </button>
-          </div>
+            </button></Can>
+          </div></Can>
         )}
       </div>
 
-      <p className="text-sm text-slate-500">
+      <Can id="header"><p className="text-sm text-slate-500">
         จัดการข้อมูลส่วนตัว โอนย้ายแผนก และตรวจประวัติสกิลเดิม · คะแนนพนักงานปรับผ่านหัวหน้างานและการอนุมัติ
-      </p>
+      </p></Can>
 
       {successMessage && (
         <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800 flex items-center gap-2 shadow-xs">
@@ -166,7 +167,7 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
         </div>
       )}
 
-      <FilterBar title="ค้นหาพนักงาน" onReset={() => { setSearch(''); setCurrentPage(1); }}>
+      <Can id="filters"><FilterBar title="ค้นหาพนักงาน" onReset={() => { setSearch(''); setCurrentPage(1); }}>
         <Field label="ค้นหาพนักงาน">
           <input
             className={inputClass}
@@ -175,9 +176,9 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
             placeholder="รหัส / ชื่อ / แผนก / ตำแหน่ง"
           />
         </Field>
-      </FilterBar>
+      </FilterBar></Can>
 
-      <div className={`${panelClass} overflow-x-auto`}>
+      <Can id="table"><div className={`${panelClass} overflow-x-auto`}>
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50">
             <tr>
@@ -214,7 +215,7 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
                   <td className="p-4 text-right">
                     {userRole === 'admin' && (
                       <div className="flex items-center justify-end gap-1.5">
-                        <button
+                        <Can id="table" action="edit"><button
                           type="button"
                           title="แก้ไขข้อมูลทั่วไป"
                           className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-slate-300 transition-colors"
@@ -233,8 +234,8 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
                         >
                           <Pencil size={13} />
                           <span>แก้ไข</span>
-                        </button>
-                        <button
+                        </button></Can>
+                        <Can id="history"><button
                           type="button"
                           title="ดูประวัติการโอนย้ายและสกิลของแผนกเดิม"
                           className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold shadow-2xs transition-colors ${
@@ -246,7 +247,7 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
                         >
                           <History size={13} />
                           <span>ประวัติ {e.transferHistory?.length ? `(${e.transferHistory.length})` : ''}</span>
-                        </button>
+                        </button></Can>
                       </div>
                     )}
                   </td>
@@ -270,7 +271,7 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
           pageSizeOptions={[5, 10, 25, 50]}
           itemLabel="คน"
         />
-      </div>
+      </div></Can>
 
       {form && userRole === 'admin' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-6 backdrop-blur-2xs">

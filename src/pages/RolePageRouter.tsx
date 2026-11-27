@@ -14,17 +14,23 @@ import { ManagerHomePage, ManagerSkillApprovalsPage, ManagerIndividualScoresPage
 import IndividualAssessmentPage from './manager/IndividualAssessmentPage';
 import SectionAssessmentPage from './manager/SectionAssessmentPage';
 import ManagerTrainingApprovalsPage from './manager/TrainingApprovalsPage';
-import { AdminHomePage, AdminEmployeesPage, AdminMasterDataPage, AdminSkillAuditPage, AdminReportsPage, AdminSettingsPage, AdminPermissionsPage, AdminTrainingAuditPage } from './admin/AdminPages';
+import { AdminHomePage, AdminEmployeesPage, AdminMasterDataPage, AdminSkillAuditPage, AdminReportsPage, AdminSettingsPage, AdminTrainingAuditPage } from './admin/AdminPages';
 import CompareView from './CompareView';
 import TalentFinder from './TalentFinder';
 import { StaffLmsLearningPage, StaffLmsCatalogPage, StaffLmsCertificatesPage } from './staff/LmsStaffPages';
 import { ChiefLmsCertifyPage, ChiefLmsProgressPage } from './chief/LmsChiefPages';
 import ManagerLmsDashboard from './manager/LmsDashboard';
+import RolePermissionsPage from './admin/RolePermissionsPage';
+import { AccessScope } from '../components/Permission';
+import { allowed, initialPermissions } from '../data/permissionStore';
+import type { AccessRole } from '../data/permissionStore';
 import ChiefLmsPracticalPage from './chief/LmsPracticalPage';
 import { AdminLmsCoursesPage, AdminLmsEnrollmentsPage, AdminLmsReportsPage } from './admin/LmsAdminPages';
 
-export default function RolePageRouter({page,role,onNavigate,assessmentScope}:{page:string;role:string;onNavigate:(page:string,scope?:ScoreAssessmentScope)=>void;assessmentScope?:ScoreAssessmentScope}) {
+export default function RolePageRouter({page,role,access:granted,onNavigate,onSwitchRole,assessmentScope}:{page:string;role:string;access?:AccessRole;onNavigate:(page:string,scope?:ScoreAssessmentScope)=>void;onSwitchRole?:(id:string)=>void;assessmentScope?:ScoreAssessmentScope}) {
   if(!roleCanVisit(page,role)) return <EmptyState>หน้านี้ไม่อยู่ในพื้นที่ของบทบาทที่เลือก</EmptyState>;
+  const access=granted??initialPermissions().roles.find(r=>r.base===role)!;
+  if(!allowed(access,page)) return <EmptyState>บทบาท “{access.name}” ไม่มีสิทธิ์เปิดหน้านี้</EmptyState>;
   const pages:Record<string,ReactElement>={
     'staff-home':<StaffHomePage onNavigate={onNavigate}/>,
     'staff-my-skills':<StaffSkillsPage/>, 'staff-yearly':<StaffYearlyPage/>,
@@ -50,7 +56,7 @@ export default function RolePageRouter({page,role,onNavigate,assessmentScope}:{p
     'admin-master-data':<AdminMasterDataPage/>,
     'admin-skill-audit':<AdminSkillAuditPage/>, 'admin-training-audit':<AdminTrainingAuditPage/>,
     'admin-reports':<AdminReportsPage/>, 'admin-settings':<AdminSettingsPage onNavigate={onNavigate}/>,
-    'admin-permissions':<AdminPermissionsPage/>,
+    'admin-permissions':<RolePermissionsPage onSwitchRole={onSwitchRole}/>,
   };
-  return pages[page]??<EmptyState>ไม่พบหน้าที่เลือก</EmptyState>;
+  return <AccessScope role={access} page={page}>{pages[page]??<EmptyState>ไม่พบหน้าที่เลือก</EmptyState>}</AccessScope>;
 }

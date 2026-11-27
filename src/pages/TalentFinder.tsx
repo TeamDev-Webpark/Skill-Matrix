@@ -1,3 +1,4 @@
+import { Can } from '../components/Permission';
 import { Paged } from '../components/Paged';
 import { useMemo, useState } from 'react';
 import { Download, Plus, Search, UserCheck, X } from 'lucide-react';
@@ -66,8 +67,8 @@ export default function TalentFinder({ userRole }: { userRole: 'chief' | 'manage
   }
 
   return <div className="space-y-6">
-    <RolePageIntro title="ค้นหาบุคลากรตามสกิล" description={`ค้นหา${isChief ? 'ลูกทีมตรงของคุณ' : 'พนักงานทุกแผนก'}ที่มีสกิลตรงกับงาน เช่น W/I และประเภทสกิลในระดับที่ต้องการ เพื่อคัดเลือกเข้าหน้างาน`} steps={['เลือก W/I ประเภทสกิล และระดับขั้นต่ำ','ดูรายชื่อที่ตรงเกณฑ์ (เพิ่มได้หลายสกิล)','เลือกรายชื่อและส่งออกเป็น CSV']}/>
-    <section className={`${panelClass} space-y-5 p-5`} aria-label="เงื่อนไขการค้นหา">
+    <Can id="header"><RolePageIntro title="ค้นหาบุคลากรตามสกิล" description={`ค้นหา${isChief ? 'ลูกทีมตรงของคุณ' : 'พนักงานทุกแผนก'}ที่มีสกิลตรงกับงาน เช่น W/I และประเภทสกิลในระดับที่ต้องการ เพื่อคัดเลือกเข้าหน้างาน`} steps={['เลือก W/I ประเภทสกิล และระดับขั้นต่ำ','ดูรายชื่อที่ตรงเกณฑ์ (เพิ่มได้หลายสกิล)','เลือกรายชื่อและส่งออกเป็น CSV']}/></Can>
+    <Can id="criteria"><section className={`${panelClass} space-y-5 p-5`} aria-label="เงื่อนไขการค้นหา">
       <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
         <Field label="แผนก"><select className={inputClass} value={department} disabled={isChief} onChange={e => { setDepartment(e.target.value); setCriteria([newCriterion()]); setPicked([]); }}>{!isChief && <option value="ALL">ทุกแผนก</option>}{departments.map(d => <option key={d}>{d}</option>)}</select></Field>
         <Field label="ค้นหาชื่อ / รหัส / ตำแหน่ง"><div className="relative"><Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/><input className={`${inputClass} pl-9`} value={query} onChange={e => setQuery(e.target.value)} placeholder="เช่น สมชาย, EMP001, Technician"/></div></Field></div>
@@ -83,14 +84,14 @@ export default function TalentFinder({ userRole }: { userRole: 'chief' | 'manage
       <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-blue-100 pt-4 text-sm text-slate-700">
         <label className="flex items-center gap-2"><input type="checkbox" checked={near} onChange={e => setNear(e.target.checked)}/>แสดงผู้ที่ใกล้ถึงเกณฑ์ (ต่ำกว่าเกณฑ์ 1 ระดับ) เพื่อพิจารณาอบรมเพิ่ม</label>
         <label className="flex items-center gap-2"><input type="checkbox" checked={onDuty} onChange={e => setOnDuty(e.target.checked)}/>เฉพาะผู้ที่ได้รับมอบหมายสกิลนี้ในหน้างาน</label></div>
-    </section>
+    </section></Can>
 
-    {active.length === 0 ? <EmptyState>เลือก W/I และประเภทสกิลอย่างน้อย 1 รายการ เพื่อเริ่มค้นหา</EmptyState> : <>
-      <div className="grid gap-4 md:grid-cols-5"><Metric label="ตรงเกณฑ์" value={full} note={`จาก ${people.length} คนในขอบเขต`}/>{[0, 1, 2, 3].map(l => <Metric key={l} label={`${label(first)} · Lv ${l}`} value={dist[l]} note={LEVEL_LABELS[l]}/>)}</div>
+    {active.length === 0 ? <Can id="results"><EmptyState>เลือก W/I และประเภทสกิลอย่างน้อย 1 รายการ เพื่อเริ่มค้นหา</EmptyState></Can> : <>
+      <Can id="summary"><div className="grid gap-4 md:grid-cols-5"><Metric label="ตรงเกณฑ์" value={full} note={`จาก ${people.length} คนในขอบเขต`}/>{[0, 1, 2, 3].map(l => <Metric key={l} label={`${label(first)} · Lv ${l}`} value={dist[l]} note={LEVEL_LABELS[l]}/>)}</div></Can>
       {noSkill > 0 && <p className="text-xs text-slate-500">มี {noSkill} คนที่ไม่มีสกิล {label(first)} เพราะ W/I นี้อยู่คนละแผนก (ไม่นับในการกระจายระดับ)</p>}
-      <section className={`${panelClass} p-5`} aria-label="ผลการค้นหา">
+      <Can id="results"><section className={`${panelClass} p-5`} aria-label="ผลการค้นหา">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><h2 className="font-bold text-slate-800">ผลการค้นหา {rows.length} คน{picked.length > 0 && <span className="ml-2 text-sm font-normal text-blue-700">เลือกไว้ {picked.length} คน</span>}</h2>
-          <div className="flex gap-2">{picked.length > 0 && <button className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" onClick={() => setPicked([])}>ล้างที่เลือก</button>}<button className={buttonClass} disabled={!rows.length} onClick={exportCsv}><Download size={16}/>ส่งออก CSV{picked.length ? ' (ที่เลือก)' : ''}</button></div></div>
+          <div className="flex gap-2">{picked.length > 0 && <button className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" onClick={() => setPicked([])}>ล้างที่เลือก</button>}<Can id="export"><button className={buttonClass} disabled={!rows.length} onClick={exportCsv}><Download size={16}/>ส่งออก CSV{picked.length ? ' (ที่เลือก)' : ''}</button></Can></div></div>
         {rows.length === 0 ? <p className="rounded-lg bg-slate-50 p-6 text-center text-sm text-slate-500">ไม่พบพนักงานที่ตรงเงื่อนไข ลองลดระดับขั้นต่ำ หรือเปิด "แสดงผู้ที่ใกล้ถึงเกณฑ์"</p> :
           <Paged items={rows} unit="คน" resetKey={JSON.stringify([department, query, criteria, matchAll, near, onDuty])}>{({ rows: shown, bar }) => <><div className="overflow-x-auto"><table className="w-full min-w-[44rem] text-sm"><thead className="text-left text-xs text-slate-500"><tr><th className="w-8 py-2"><span className="sr-only">เลือก</span></th><th>พนักงาน</th><th>แผนก</th>{active.map(c => <th key={c.id}>{label(c)}</th>)}<th>ข้อมูลประกอบ</th></tr></thead><tbody>
             {shown.map(r => <tr key={r.e.id} className={`border-t border-blue-50 align-top ${r.full ? '' : 'bg-amber-50/40'}`}>
@@ -101,6 +102,6 @@ export default function TalentFinder({ userRole }: { userRole: 'chief' | 'manage
               <td className="space-y-1 py-3 text-xs">{!r.full && <p className="font-semibold text-amber-700">ใกล้ถึงเกณฑ์ · พิจารณาอบรมเพิ่ม</p>}{r.duty && <p className="flex items-center gap-1 text-emerald-700"><UserCheck size={12}/>ได้รับมอบหมายสกิลนี้ในหน้างาน</p>}
                 {active.some((c, i) => pendingKeys.has(`${r.e.id}|${c.wi}_${c.type}`) && r.levels[i] !== undefined) && <p className="text-blue-700">มีคำขอปรับคะแนนรอ Manager ยืนยัน</p>}
                 {active.flatMap(c => lmsCerts(r.e, c)).map(k => k && <p key={k.id} className="text-slate-600">ผ่านอบรมออนไลน์: {k.title}</p>)}</td></tr>)}</tbody></table></div>{bar}</>}</Paged>}
-      </section></>}
+      </section></Can></>}
   </div>;
 }
